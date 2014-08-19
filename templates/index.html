@@ -1,44 +1,88 @@
 <html>
 <head>
+    <title>Gutter Heater and Christmas Light Control</title>
+    <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
   <script type="text/javascript">
   window.onload = function () {
-    var ss = "{{ log[0].split(',')[5] }}";
     var chart = new CanvasJS.Chart("chartContainer",
     {
+        animationEnabled: true,
       title:{
-        text: "Multi-Series Spline Area Chart"
+        text: "Temps and Heat On"
+      },
+        toolTip: {
+        shared: "true"
       },
         axisY:{
+            title:"Temp",
             valueFormatString:"##.#",
-            minimum:0,
-            maximum:100
+            interval: 10
         },
         axisX:{
-           valueFormatString:"hh:mm",
+           valueFormatString:"hh:mm"
+        },
+        axisY2: {
+            title: "Heat On",
+            interval: 1,
+            minimum:0,
+            maximum:1
         },
       data: [
+              {
+            name: "Heat",
+            showInLegend: true,
+            legendMarkerType: "square",
+            type: "stepArea",
+            color: "rgba(255,0,0,.7)",
+            markerSize: 0,
+            label: "",
+            axisYType: "secondary",
+            dataPoints: [
+
+        {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-13].split('|')[0] }}),y: parseFloat("{{ log[log|count-13].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-12].split('|')[0] }}),y: parseFloat("{{ log[log|count-12].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-11].split('|')[0] }}),y: parseFloat("{{ log[log|count-11].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-10].split('|')[0] }}),y: parseFloat("{{ log[log|count-10].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-9].split('|')[0] }}),y: parseFloat("{{ log[log|count-9].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-8].split('|')[0] }}),y: parseFloat("{{ log[log|count-8].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-7].split('|')[0] }}),y: parseFloat("{{ log[log|count-7].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-6].split('|')[0] }}),y: parseFloat("{{ log[log|count-6].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-5].split('|')[0] }}),y: parseFloat("{{ log[log|count-5].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-4].split('|')[0] }}),y: parseFloat("{{ log[log|count-4].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[2] }}")},
+        {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[2] }}")}
+            ]
+        },
       {
+        name:"Temp",
+          showInLegend: true,
+            legendMarkerType: "square",
         xValueType: "dateTime",
         type: "splineArea",
-        color: "rgba(54,158,173,.7)",
+        color: "rgba(54,158,173,0.95)",
 
         dataPoints: [
-        {x: new Date(2014, 08, 18, 1,00),y: '{{ log[0].split(",")[5] }}'},
-        {x: new Date(2014, 08, 18, 1,30),y: "{{ log[1].split(',')[5] }}"},
-        {x: new Date(2014, 08, 18, 2,00),y: "{{ log[2].split(',')[5] }}"},
-        {x: new Date(2014, 08, 18, 2,30),y: 28},
-        {x: new Date(2014, 08, 18, 3,00),y: 31},
-        {x: new Date(2014, 08, 18, 3,30),y: 14},
-        {x: new Date(2014, 08, 18, 4,00),y: 26},
-        {x: new Date(2014, 08, 18, 4,30),y: 9},
-        {x: new Date(2014, 08, 18, 5,00),y: 18},
-        {x: new Date(2014, 08, 18, 5,30),y: 11},
-        {x: new Date(2014, 08, 18, 6,00),y: 7},
-        {x: new Date(2014, 08, 18, 6,30),y: 1},
-        {x: new Date(2014, 08, 18, 7,00),y: 7},
-        {x: new Date(2014, 08, 18, 7,30),y: 7},
-        {x: new Date(2014, 08, 18, 8,00),y: 7},
-        {x: new Date(2014, 08, 18, 8,30),y: 91}
+        {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-13].split('|')[0] }}),y: parseFloat("{{ log[log|count-13].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-12].split('|')[0] }}),y: parseFloat("{{ log[log|count-12].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-11].split('|')[0] }}),y: parseFloat("{{ log[log|count-11].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-10].split('|')[0] }}),y: parseFloat("{{ log[log|count-10].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-9].split('|')[0] }}),y: parseFloat("{{ log[log|count-9].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-8].split('|')[0] }}),y: parseFloat("{{ log[log|count-8].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-7].split('|')[0] }}),y: parseFloat("{{ log[log|count-7].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-6].split('|')[0] }}),y: parseFloat("{{ log[log|count-6].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-5].split('|')[0] }}),y: parseFloat("{{ log[log|count-5].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-4].split('|')[0] }}),y: parseFloat("{{ log[log|count-4].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[1] }}")},
+        {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[1] }}")}
         ]
       }
       ]
@@ -50,16 +94,9 @@
 <script type="text/javascript" src="/static/canvasjs.min.js"></script>
 </head>
 <body>
-<div id="chartContainer" style="height: 300px; width: 70%;">
+<div id="chartContainer" style="height: 400px; width: 70%;">
   </div>
-{% if log|count >= 16 %}
-	{% for x in range(log|count-16,log|count) %}
-		<p>{{  log[x] }}</p>
-	{% endfor %}
-{% else %}
-	{% for x in range(0,log|count) %}
-		<p>{{  log[x] }}</p>
-	{% endfor %}
-{% endif %}
+
+Lights on at: {{ lights_on_time }}
 </body>
 </html>

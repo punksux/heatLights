@@ -8,6 +8,8 @@ templateData = {
     'lights_on': False,
     'lights_on_time': 0,
     'log': {},
+    'sunset_hour': 0,
+    'sunset_minute': 0,
 }
 
 # Imports
@@ -21,6 +23,7 @@ from socket import timeout
 import logging
 import logging.handlers
 import json
+import random
 
 sched = Scheduler()
 sched.start()
@@ -63,7 +66,7 @@ def check_weather():
     if weather_test == 200:
         global something_wrong
         global f
-        weather_website = ('http://api.wunderground.com/api/c5e9d80d2269cb64/conditions/q/%s.json' % location)
+        weather_website = ('http://api.wunderground.com/api/c5e9d80d2269cb64/conditions/astronomy/q/%s.json' % location)
         if on_pi:
             try:
                 f = urllib2.urlopen(weather_website, timeout=3)
@@ -92,6 +95,8 @@ def check_weather():
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
             templateData['temp'] = parsed_json['current_observation']['temp_f']
+            templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
+            templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
             f.close()
     else:
         templateData['temp_f'] = weather_test
@@ -99,17 +104,15 @@ def check_weather():
 
 def write_log(message, on_off):
     if on_off:
-        on_off = 1
+        on_off = "1"
     else:
-        on_off = "null"
+        on_off = "0"
     if os.path.getsize('log.log') > 1000000:
         r = open('log.log', 'w')
-        r.write(datetime.now().strftime('%m/%d/%Y %I:%M %p') + "," + str(message) + "," + on_off + '\n')
-        r.close()
     else:
         r = open('log.log', 'a')
-        r.write(datetime.now().strftime('%m/%d/%Y %I:%M %p') + "," + str(message) + "," + on_off + '\n')
-        r.close()
+    r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + '\n')
+    r.close()
 
 
 def turn_on_heat():
@@ -137,12 +140,19 @@ else:
     print(s.replace(minute=30, second=00, microsecond=0))
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
 
+check_weather()
+if random.randrange(0,1) == 1:
+    pos_neg = -1
+else:
+    pos_neg = 1
+rand = int(templateData['sunset_minute'])+(random.randrange(1, 20)*pos_neg)
+templateData['lights_on_time'] = templateData['sunset_hour'] + ":" + str(rand)
+
 
 try:
 
     @app.route('/')
     def my_form():
-        print('ok')
         templateData['log'] = [log.rstrip('\n') for log in open('log.log')]
         return render_template("index.html", **templateData)
 
