@@ -122,31 +122,59 @@ def turn_on_heat():
             GPIO.output(7, False)
         else:
             print('%s - Heat on: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
+        templateData['heat_on'] = True
         write_log(templateData['temp'], True)
     else:
         if on_pi:
             GPIO.output(7, True)
         else:
             print('%s - Heat off: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
+        templateData['heat_on'] = False
         write_log(templateData['temp'], False)
 
 
 s = datetime.now()
 if s.minute > 30:
-    print(s.replace(hour=s.hour+1, minute=00, second=00, microsecond=0))
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(hour=s.hour+1, minute=00,
                                                                             second=00, microsecond=0))
 else:
-    print(s.replace(minute=30, second=00, microsecond=0))
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
 
+
+
+
+def turn_on_lights():
+    if on_pi:
+        GPIO.output(13, False)
+    else:
+        print ('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+    templateData['lights_on'] = True
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=10, minute=(30+random.randint(0, 20))))
+
+
+def turn_off_lights():
+    if on_pi:
+        GPIO.output(13, True)
+    else:
+        print ('%s - Lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+    templateData['lights_on'] = False
+    job = sched.add_date_job(get_start_time, datetime.now().replace(day=datetime.now().day+1,
+                                                                    hour=2, minute=00))
+
 check_weather()
-if random.randrange(0,1) == 1:
-    pos_neg = -1
-else:
-    pos_neg = 1
-rand = int(templateData['sunset_minute'])+(random.randrange(1, 20)*pos_neg)
-templateData['lights_on_time'] = templateData['sunset_hour'] + ":" + str(rand)
+
+
+def get_start_time():
+    #check_weather()
+    if random.randint(0,1) == 1:
+        pos_neg = -1
+    else:
+        pos_neg = 1
+    templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 20)*pos_neg)
+    templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
+    job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=templateData['sunset_hour'],
+                                                                    minute=templateData['sunset_minute']))
+get_start_time()
 
 
 try:
