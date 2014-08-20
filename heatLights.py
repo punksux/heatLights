@@ -1,6 +1,12 @@
 location = "84123"
 on_pi = False
 weather_test = 200
+lights_start = None
+job = None
+heat_program_running = False
+light_program_has_run = False
+lights_pin = 13
+heat_pin = 7
 
 templateData = {
     'temp': 0.0,
@@ -8,8 +14,13 @@ templateData = {
     'lights_on': False,
     'lights_on_time': 0,
     'log': {},
-    'sunset_hour': 0,
-    'sunset_minute': 0,
+    'sunset_hour': 13,
+    'sunset_minute': 41,
+    'start_date': '8/20/2014',
+    'lights_off_time': '22:30',
+    'settings_set': False,
+    'light_program_running': False,
+    'message': "",
 }
 
 # Imports
@@ -114,19 +125,21 @@ def write_log(message, on_off):
     r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + '\n')
     r.close()
 
+# **Start Heat
+
 
 def turn_on_heat():
     check_weather()
     if templateData['temp'] < 34:
         if on_pi:
-            GPIO.output(7, False)
+            GPIO.output(heat_pin, False)
         else:
             print('%s - Heat on: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = True
         write_log(templateData['temp'], True)
     else:
         if on_pi:
-            GPIO.output(7, True)
+            GPIO.output(heat_pin, True)
         else:
             print('%s - Heat off: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = False
@@ -140,43 +153,49 @@ if s.minute > 30:
 else:
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
 
-
+# **End Heat
+# **Start Lights
 
 
 def turn_on_lights():
+    global light_program_has_run
     if on_pi:
-        GPIO.output(13, False)
+        GPIO.output(lights_pin, False)
     else:
-        print ('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+        print('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = True
-    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=10, minute=(30+random.randint(0, 20))))
+    light_program_has_run = True
+    split = templateData['off_time'].split(':')
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=(split[1] +
+                                                                                            random.randint(0, 10))))
 
 
 def turn_off_lights():
     if on_pi:
-        GPIO.output(13, True)
+        GPIO.output(lights_pin, True)
     else:
-        print ('%s - Lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+        print('%s - Lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = False
-    job = sched.add_date_job(get_start_time, datetime.now().replace(day=datetime.now().day+1,
-                                                                    hour=2, minute=00))
+    job = sched.add_date_job(pre_lights, datetime.now().replace(day=datetime.now().day+1,
+                                                                hour=2, minute=00))
 
-check_weather()
+
+def pre_lights():
+    get_start_time()
+    job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=templateData['sunset_hour'],
+                                                                    minute=templateData['sunset_minute']))
 
 
 def get_start_time():
     #check_weather()
-    if random.randint(0,1) == 1:
+    if random.randint(0, 1) == 1:
         pos_neg = -1
     else:
         pos_neg = 1
-    templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 20)*pos_neg)
+    templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 10)*pos_neg)
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
-    job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=templateData['sunset_hour'],
-                                                                    minute=templateData['sunset_minute']))
-get_start_time()
 
-
+check_weather()
 try:
 
     @app.route('/')
@@ -184,10 +203,80 @@ try:
         templateData['log'] = [log.rstrip('\n') for log in open('log.log')]
         return render_template("index.html", **templateData)
 
+    @app.route('/', methods=['POST'])
+    def my_form_post():
+        if request.form['start_date'] != "" and datetime.strptime(request.form['start_date'] + " " +
+                                                                  str(templateData['sunset_hour']) + " " +
+                                                                  str(templateData['sunset_minute']),
+                                                                  '%m/%d/%Y %H %M') > datetime.now():
+            start_date = request.form['start_date']
+            templateData['start_date'] = start_date
+            templateData['settings_set'] = True
+            templateData['message'] = ''
+        else:
+            templateData['message'] = "Set date for a day in the future"
+        if request.form['off_time'] != "":
+            templateData['lights_off_time'] = request.form['off_time']
+            templateData['message'] = ''
+        return render_template("index.html", **templateData)
+
+    @app.route("/lightsStart")
+    def start_program():
+        if templateData['light_program_running'] is False:
+            global lights_start
+            get_start_time()
+            split = templateData['start_date'].split('/')
+            start_date = datetime(int(split[2]), int(split[0]), int(split[1]), int(templateData['sunset_hour']),
+                                  int(templateData['sunset_minute']), 00)
+            if start_date < datetime.now():
+                start_date = datetime.now().replace(hour=int(templateData['sunset_hour']),
+                                                    minute=int(templateData['sunset_minute']), second=00)
+
+            try:
+                lights_start = sched.add_date_job(turn_on_lights, start_date)
+            except:
+                print('time has past')
+            templateData['light_program_running'] = True
+
+            return redirect(url_for('my_form'))
+
+    @app.route("/lightsStop")
+    def stop_program():
+        if templateData['light_program_running']:
+            global lights_start
+            if light_program_has_run:
+                sched.unschedule_job(job)
+            else:
+                sched.unschedule_job(lights_start)
+            templateData['light_program_running'] = False
+            return redirect(url_for('my_form'))
+
+    @app.route("/lightsOn/<length>")
+    def lights_on(length):
+        if on_pi:
+            GPIO.output(lights_pin, False)
+        else:
+            print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),length))
+        templateData['lights_on'] = True
+        if int(length) > 0:
+            temp = datetime.now() + timedelta(seconds=int(length)*60)
+            man_job = sched.add_date_job(url_for('lights_off'), temp)
+        return redirect(url_for('my_form'))
+
+    @app.route("/lightsOff")
+    def lights_off():
+        if on_pi:
+            GPIO.output(lights_pin, True)
+        else:
+            print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+        templateData['lights_on'] = False
+        return redirect(url_for('my_form'))
+
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=5001)
 
 finally:
+    print('Quitting')
     sched.shutdown()
     if on_pi:
         GPIO.cleanup()

@@ -1,8 +1,8 @@
 <html>
 <head>
     <title>Gutter Heater and Christmas Light Control</title>
-    <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <script type="text/javascript">
   window.onload = function () {
     var chart = new CanvasJS.Chart("chartContainer",
@@ -16,8 +16,8 @@
       },
         axisY:{
             title:"Temp",
-            valueFormatString:"##.#",
-            interval: 10
+            valueFormatString:"##.#"
+
         },
         axisX:{
            valueFormatString:"hh:mm"
@@ -92,11 +92,60 @@
   }
   </script>
 <script type="text/javascript" src="/static/canvasjs.min.js"></script>
+    <script src="/static/jquery-2.1.1.min.js"></script>
+     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+     <script>
+$(function() {
+$( "#start_date" ).datepicker();
+});
+</script>
 </head>
 <body>
 <div id="chartContainer" style="height: 400px; width: 70%;">
   </div>
-
-Lights on at: {{ lights_on_time }}
+{% if lights_on %}
+    <div id="lights_on">on</div>
+{% else %}
+    <div id="lights_off">off</div>
+{% endif %}
+{% if lights_on_time != 0 %}
+    <p>Lights on at: {{ lights_on_time }}</p>
+{% endif %}
+<p>Lights off at: {{ lights_off_time }}</p>
+<p>Starting on: {{ start_date }}</p>
+<form action="." method="POST">
+    Start date: <input type="text" id="start_date" name="start_date">
+    <p>Off time: <input type="time" id="off_time" name="off_time"></p>
+    <p><input type="submit" name="my-form" value="Apply" /></p>
+</form>
+{% if settings_set %}
+    {% if light_program_running %}
+        <a href="/lightsStop">Stop</a>
+    {% else %}
+        <a href="/lightsStart">Start</a>
+    {% endif %}
+{% endif %}
+<p></p>
+<input type="number" id="man">
+{% if lights_on %}
+    <a href="/lightsOff">Turn lights off</a>
+{% else %}
+    <a href="#" onclick="GetURL();" id="manOn">Turn lights on</a>
+{% endif %}
+</p>
+<script>
+                function GetURL()
+                    {
+                        var myAnchor = document.getElementById("manOn");
+                        var myTextBox = document.getElementById("man");
+                        if (myTextBox.value === "") {
+                            myAnchor.href = "/lightsOn/0";
+                        } else {
+                            myAnchor.href = "/lightsOn/" + myTextBox.value;
+                        }
+                    }
+                </script>
+{{ message }}
 </body>
 </html>
