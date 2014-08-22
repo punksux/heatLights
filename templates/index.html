@@ -1,45 +1,42 @@
+<!--suppress ALL -->
 <html>
-<head>
-    <title>Gutter Heater and Christmas Light Control</title>
-    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-  <script type="text/javascript">
-  window.onload = function () {
-    var chart = new CanvasJS.Chart("chartContainer",
-    {
-        animationEnabled: true,
-      title:{
-        text: "Temps and Heat On"
-      },
-        toolTip: {
-        shared: "true"
-      },
-        axisY:{
-            title:"Temp",
-            valueFormatString:"##.#"
-
-        },
-        axisX:{
-           valueFormatString:"hh:mm"
-        },
-        axisY2: {
-            title: "Heat On",
-            interval: 1,
-            minimum:0,
-            maximum:1
-        },
-      data: [
-              {
-            name: "Heat",
-            showInLegend: true,
-            legendMarkerType: "square",
-            type: "stepArea",
-            color: "rgba(255,0,0,.7)",
-            markerSize: 0,
-            label: "",
-            axisYType: "secondary",
-            dataPoints: [
-
+    <head>
+        <title>Gutter Heater and Christmas Light Control</title>
+        <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+        <script type="text/javascript">
+            window.onload = function () {
+                var chart = new CanvasJS.Chart("chartContainer",{
+                    animationEnabled: true,
+                    title:{
+                        text: "Temps and Heat On"
+                    },
+                    toolTip: {
+                        shared: "true"
+                    },
+                    axisY:{
+                        title:"Temp",
+                        valueFormatString:"##.#°"
+                    },
+                    axisX:{
+                        valueFormatString:"hh:mm"
+                    },
+                    axisY2: {
+                        title: "Heat On",
+                        interval: 1,
+                        minimum:0,
+                        maximum:1
+                    },
+                    data: [{
+                        name: "Heat",
+                        showInLegend: true,
+                        legendMarkerType: "square",
+                        type: "stepArea",
+                        color: "rgba(255,0,0,.7)",
+                        markerSize: 0,
+                        label: "",
+                        axisYType: "secondary",
+                        dataPoints: [
         {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[2] }}")},
         {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[2] }}")},
         {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[2] }}")},
@@ -56,17 +53,16 @@
         {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[2] }}")},
         {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[2] }}")},
         {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[2] }}")}
-            ]
-        },
-      {
-        name:"Temp",
-          showInLegend: true,
-            legendMarkerType: "square",
-        xValueType: "dateTime",
-        type: "splineArea",
-        color: "rgba(54,158,173,0.95)",
-
-        dataPoints: [
+                        ]
+                    },
+                    {
+                        name:"Temp",
+                        showInLegend: true,
+                        legendMarkerType: "square",
+                        xValueType: "dateTime",
+                        type: "splineArea",
+                        color: "rgba(54,158,173,0.95)",
+                        dataPoints: [
         {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[1] }}")},
         {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[1] }}")},
         {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[1] }}")},
@@ -83,69 +79,137 @@
         {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[1] }}")},
         {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[1] }}")},
         {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[1] }}")}
-        ]
-      }
-      ]
-    });
-
-    chart.render();
-  }
-  </script>
-<script type="text/javascript" src="/static/canvasjs.min.js"></script>
-    <script src="/static/jquery-2.1.1.min.js"></script>
-     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
-     <script>
-$(function() {
-$( "#start_date" ).datepicker();
-});
-</script>
-</head>
+                        ]
+            }]});
+            chart.render();
+            }
+        </script>
+        <script type="text/javascript" src="/static/canvasjs.min.js"></script>
+        <script src="/static/jquery-2.1.1.min.js"></script>
+        <script src="/static/jquery-ui.js"></script>
+        <script src="/static/snowstorm-min.js"></script>
+        <script>
+            snowStorm.snowColor = '#ffffff';
+            snowStorm.flakesMaxActive = 96;
+            snowStorm.followMouse = false;
+            snowStorm.snowCharacter = '*';
+            snowStorm.autoStart = false;
+            snowStorm.stop()
+        </script>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/bulbs.css">
+        <script>
+            $(function() {
+                $( "#start_date" ).datepicker();
+            });
+        </script>
+    </head>
 <body>
-<div id="chartContainer" style="height: 400px; width: 70%;">
-  </div>
-{% if lights_on %}
-    <div id="lights_on">on</div>
-{% else %}
-    <div id="lights_off">off</div>
-{% endif %}
-{% if lights_on_time != 0 %}
-    <p>Lights on at: {{ lights_on_time }}</p>
-{% endif %}
-<p>Lights off at: {{ lights_off_time }}</p>
-<p>Starting on: {{ start_date }}</p>
-<form action="." method="POST">
-    Start date: <input type="text" id="start_date" name="start_date">
-    <p>Off time: <input type="time" id="off_time" name="off_time"></p>
-    <p><input type="submit" name="my-form" value="Apply" /></p>
-</form>
-{% if settings_set %}
-    {% if light_program_running %}
-        <a href="/lightsStop">Stop</a>
+    <div id="content">
+    <div id="bulbs">
+        {% for x in range(1,19) %}
+            <div id="base{{ x }}" class="bases"></div>
+        {% endfor %}
+    {% if lights_on %}
+        <div class="bulb lights_on_red" id="b1"></div>
+        <div class="bulb lights_on_blue" id="b2"></div>
+        <div class="bulb lights_on_yellow" id="b3"></div>
+        <div class="bulb lights_on_green" id="b4"></div>
+        <div class="bulb lights_on_purple" id="b5"></div>
+        <div class="bulb lights_on_orange" id="b6"></div>
+        <div class="bulb lights_on_red" id="b7"></div>
+        <div class="bulb lights_on_blue" id="b8"></div>
+        <div class="bulb lights_on_yellow" id="b9"></div>
+        <div class="bulb lights_on_green" id="b10"></div>
+        <div class="bulb lights_on_purple" id="b11"></div>
+        <div class="bulb lights_on_orange" id="b12"></div>
+        <div class="bulb lights_on_red" id="b13"></div>
+        <div class="bulb lights_on_blue" id="b14"></div>
+        <div class="bulb lights_on_yellow" id="b15"></div>
+        <div class="bulb lights_on_green" id="b16"></div>
+        <div class="bulb lights_on_purple" id="b17"></div>
+        <div class="bulb lights_on_orange" id="b18"></div>
     {% else %}
-        <a href="/lightsStart">Start</a>
+        <div class="bulb lights_off_red" id="b1"></div>
+        <div class="bulb lights_off_blue" id="b2"></div>
+        <div class="bulb lights_off_yellow" id="b3"></div>
+        <div class="bulb lights_off_green" id="b4"></div>
+        <div class="bulb lights_off_purple" id="b5"></div>
+        <div class="bulb lights_off_orange" id="b6"></div>
+        <div class="bulb lights_off_red" id="b7"></div>
+        <div class="bulb lights_off_blue" id="b8"></div>
+        <div class="bulb lights_off_yellow" id="b9"></div>
+        <div class="bulb lights_off_green" id="b10"></div>
+        <div class="bulb lights_off_purple" id="b11"></div>
+        <div class="bulb lights_off_orange" id="b12"></div>
+        <div class="bulb lights_off_red" id="b13"></div>
+        <div class="bulb lights_off_blue" id="b14"></div>
+        <div class="bulb lights_off_yellow" id="b15"></div>
+        <div class="bulb lights_off_green" id="b16"></div>
+        <div class="bulb lights_off_purple" id="b17"></div>
+        <div class="bulb lights_off_orange" id="b18"></div>
     {% endif %}
-{% endif %}
-<p></p>
-<input type="number" id="man">
-{% if lights_on %}
-    <a href="/lightsOff">Turn lights off</a>
-{% else %}
-    <a href="#" onclick="GetURL();" id="manOn">Turn lights on</a>
-{% endif %}
-</p>
-<script>
-                function GetURL()
-                    {
-                        var myAnchor = document.getElementById("manOn");
-                        var myTextBox = document.getElementById("man");
-                        if (myTextBox.value === "") {
-                            myAnchor.href = "/lightsOn/0";
-                        } else {
-                            myAnchor.href = "/lightsOn/" + myTextBox.value;
-                        }
-                    }
-                </script>
-{{ message }}
+    </div>
+    <div id="lightsSection">
+    <div id="lightsHeader"></div>
+    <div id="lightsSettings">
+        {% if lights_on_time != 0 %}
+            <p>Lights on at: {{ lights_on_time }}</p>
+        {% endif %}
+
+        <p>Lights off at: {{ lights_off_time }}</p>
+        <p>Starting on: {{ start_date }}</p>
+    </div>
+    <div id="lightsInput">
+    <form action="." method="POST">
+        <label for="start_date">Start date:</label><input type="text" id="start_date" name="start_date" />
+        <p><label for="off_time">Off time:</label> <input type="time" id="off_time" name="off_time" /></p>
+        <p><input type="submit" name="my-form" value="Apply" /></p>
+    </form>
+
+    {% if settings_set %}
+        {% if light_program_running %}
+            <a href="/lightsStop">Stop</a>
+        {% else %}
+            <a href="/lightsStart">Start</a>
+        {% endif %}
+    {% endif %}
+    <input type="number" id="man">
+    <div id="onOffButton">
+        {% if lights_on %}
+            <a href="/lightsOff"><div id="manualOff" class="button">Turn lights off</div></a>
+        {% else %}
+            <a href="#" onclick="GetURL();" id="manOn"><div id="manualOn" class="button">Turn lights on</div></a>
+        {% endif %}
+    </div>
+    <script>
+        function GetURL(){
+            var myAnchor = document.getElementById("manOn");
+            var myTextBox = document.getElementById("man");
+            if (myTextBox.value === "") {
+                myAnchor.href = "/lightsOn/0";
+            } else {
+                myAnchor.href = "/lightsOn/" + myTextBox.value;
+            }
+        }
+    </script>
+    </div>
+    {% if message != '' %}
+        <div id="lightsMessage">
+        {{ message }}
+        </div>
+    {% endif %}
+    </div>
+    <div id="heatSection">
+        {% if heat_on %}
+            <div id="heatHeader" style="text-shadow: 0 0 10px #fefcc9, 5px -5px 15px #feec85, -10px -10px 20px #ffae34, 10px -20px 25px #ec760c, -10px -30px 30px #cd4606, 0 -40px 35px #973716, 5px -45px 40px #451b0e;">
+        {% else %}
+            <div id="heatHeader">
+        {% endif %}
+            Heat Control</div>
+        <div id="chartContainer"></div>
+    </div>
+</div>
 </body>
 </html>

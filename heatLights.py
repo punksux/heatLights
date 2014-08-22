@@ -5,6 +5,8 @@ lights_start = None
 job = None
 heat_program_running = False
 light_program_has_run = False
+old_temp = 0.0
+precip = False
 lights_pin = 13
 heat_pin = 7
 
@@ -20,13 +22,12 @@ templateData = {
     'lights_off_time': '22:30',
     'settings_set': False,
     'light_program_running': False,
-    'message': "",
+    'message': "Everything OK",
 }
 
 # Imports
 from flask import Flask, request, render_template, url_for, redirect
 from datetime import datetime, timedelta
-import time
 import os
 import platform
 from apscheduler.scheduler import Scheduler
@@ -74,6 +75,8 @@ if on_pi:
 
 
 def check_weather():
+    global old_temp
+    global precip
     if weather_test == 200:
         global something_wrong
         global f
@@ -105,9 +108,21 @@ def check_weather():
         else:
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
+            old_temp = templateData['temp']
             templateData['temp'] = parsed_json['current_observation']['temp_f']
+            print(str(old_temp) + " - " + str(templateData['temp']))
             templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
             templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
+            print(parsed_json['current_observation']['weather'])
+
+            weather = parsed_json['current_observation']['weather']
+            precip_check = ['rain', 'snow', 'drizzle']
+            if any(x in weather for x in precip_check):
+                precip = True
+            else:
+                precip = False
+
+            print(precip)
             f.close()
     else:
         templateData['temp_f'] = weather_test
@@ -130,7 +145,7 @@ def write_log(message, on_off):
 
 def turn_on_heat():
     check_weather()
-    if templateData['temp'] < 34:
+    if (templateData['temp'] < 34 and old_temp > 38) or (templateData['temp'] < 34 and precip):
         if on_pi:
             GPIO.output(heat_pin, False)
         else:
@@ -166,8 +181,11 @@ def turn_on_lights():
     templateData['lights_on'] = True
     light_program_has_run = True
     split = templateData['off_time'].split(':')
-    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=(split[1] +
-                                                                                            random.randint(0, 10))))
+    rand = split[1] + random.randint(0, 10)
+    if rand > 59:
+        split[0] += 1
+        rand -= 60
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=rand))
 
 
 def turn_off_lights():
@@ -186,16 +204,26 @@ def pre_lights():
                                                                     minute=templateData['sunset_minute']))
 
 
+def manual_lights_off():
+        if on_pi:
+            GPIO.output(lights_pin, True)
+        else:
+            print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+        templateData['lights_on'] = False
+
+
 def get_start_time():
-    #check_weather()
     if random.randint(0, 1) == 1:
         pos_neg = -1
     else:
         pos_neg = 1
     templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 10)*pos_neg)
+    if templateData['sunset_minute'] > 59:
+        templateData['sunset_minute'] -= 60
+        templateData['sunset_hour'] += 1
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
 
-check_weather()
+#check_weather()
 try:
 
     @app.route('/')
@@ -234,7 +262,8 @@ try:
 
             try:
                 lights_start = sched.add_date_job(turn_on_lights, start_date)
-            except:
+            except Exception as e:
+                print(e)
                 print('time has past')
             templateData['light_program_running'] = True
 
@@ -256,11 +285,12 @@ try:
         if on_pi:
             GPIO.output(lights_pin, False)
         else:
-            print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),length))
+             print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),
+                                                 length if int(length) > 0 else ''))
         templateData['lights_on'] = True
         if int(length) > 0:
-            temp = datetime.now() + timedelta(seconds=int(length)*60)
-            man_job = sched.add_date_job(url_for('lights_off'), temp)
+            temp = datetime.now() + timedelta(seconds=(int(length)*60))
+            man_job = sched.add_date_job(manual_lights_off, temp)
         return redirect(url_for('my_form'))
 
     @app.route("/lightsOff")
