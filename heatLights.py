@@ -12,12 +12,12 @@ heat_pin = 7
 
 templateData = {
     'temp': 0.0,
-    'heat_on': False,
+    'heat_on': True,
     'lights_on': False,
     'lights_on_time': 0,
     'log': {},
     'sunset_hour': 13,
-    'sunset_minute': 41,
+    'sunset_minute': 58,
     'start_date': '8/20/2014',
     'lights_off_time': '22:30',
     'settings_set': False,
@@ -220,6 +220,7 @@ def get_start_time():
     templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 10)*pos_neg)
     if templateData['sunset_minute'] > 59:
         templateData['sunset_minute'] -= 60
+        templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
         templateData['sunset_hour'] += 1
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
 

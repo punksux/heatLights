@@ -163,19 +163,21 @@
     </div>
     <div id="lightsInput">
     <form action="." method="POST">
-        <label for="start_date">Start date:</label><input type="text" id="start_date" name="start_date" />
-        <p><label for="off_time">Off time:</label> <input type="time" id="off_time" name="off_time" /></p>
+        <label for="start_date">Start date:</label><input type="text" id="start_date" name="start_date" class="inputInput" />
+        <p><label for="off_time">Off time:</label> <input type="time" id="off_time" name="off_time" class="inputInput" /></p>
         <p><input type="submit" name="my-form" value="Apply" /></p>
     </form>
-
+    <div id="startButton">
     {% if settings_set %}
         {% if light_program_running %}
-            <a href="/lightsStop">Stop</a>
+            <a href="/lightsStop"><div id="stop" class="button">Stop</div></a>
         {% else %}
-            <a href="/lightsStart">Start</a>
+            <a href="/lightsStart"><div id="start" class="button">Start</div></a>
         {% endif %}
     {% endif %}
-    <input type="number" id="man">
+       </div>
+    <div id="manControl">
+        <input type="number" id="man">
     <div id="onOffButton">
         {% if lights_on %}
             <a href="/lightsOff"><div id="manualOff" class="button">Turn lights off</div></a>
@@ -194,6 +196,7 @@
             }
         }
     </script>
+        </div>
     </div>
     {% if message != '' %}
         <div id="lightsMessage">
@@ -203,7 +206,7 @@
     </div>
     <div id="heatSection">
         {% if heat_on %}
-            <div id="heatHeader" style="text-shadow: 0 0 10px #fefcc9, 5px -5px 15px #feec85, -10px -10px 20px #ffae34, 10px -20px 25px #ec760c, -10px -30px 30px #cd4606, 0 -40px 35px #973716, 5px -45px 40px #451b0e;">
+            <div id="heatHeader" style="text-shadow: 0 0 10px #fefcc9, 5px -5px 15px #feec85, -10px -10px 20px #ffae34, 10px -20px 25px #ec760c, -10px -30px 30px #cd4606, 0 -40px 35px #973716, 5px -45px 40px #451b0e;color:black">
         {% else %}
             <div id="heatHeader">
         {% endif %}
