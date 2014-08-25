@@ -2,21 +2,21 @@
 <html>
     <head>
         <title>Gutter Heater and Christmas Light Control</title>
+        <meta name="viewport" content="width=device-width,height=device-height,minimum-scale=1,maximum-scale=1"/>
         <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
         <script type="text/javascript">
             window.onload = function () {
                 var chart = new CanvasJS.Chart("chartContainer",{
+                    backgroundColor: "#222",
                     animationEnabled: true,
-                    title:{
-                        text: "Temps and Heat On"
-                    },
                     toolTip: {
                         shared: "true"
                     },
                     axisY:{
                         title:"Temp",
-                        valueFormatString:"##.#°"
+                        valueFormatString:"##.#°",
+                        gridThickness: 1
                     },
                     axisX:{
                         valueFormatString:"hh:mm"
@@ -93,8 +93,8 @@
             snowStorm.flakesMaxActive = 96;
             snowStorm.followMouse = false;
             snowStorm.snowCharacter = '*';
-            snowStorm.autoStart = false;
-            snowStorm.stop()
+            {#snowStorm.autoStart = false;
+            snowStorm.stop()#}
         </script>
         <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
         <link rel="stylesheet" href="/static/style.css">
@@ -105,6 +105,7 @@
             });
         </script>
     </head>
+
 <body>
     <div id="content">
     <div id="bulbs">
@@ -177,7 +178,7 @@
     {% endif %}
        </div>
     <div id="manControl">
-        <input type="number" id="man">
+        Manual on length:<input type="number" id="man">
     <div id="onOffButton">
         {% if lights_on %}
             <a href="/lightsOff"><div id="manualOff" class="button">Turn lights off</div></a>
@@ -204,14 +205,16 @@
         </div>
     {% endif %}
     </div>
+
     <div id="heatSection">
-        {% if heat_on %}
-            <div id="heatHeader" style="text-shadow: 0 0 10px #fefcc9, 5px -5px 15px #feec85, -10px -10px 20px #ffae34, 10px -20px 25px #ec760c, -10px -30px 30px #cd4606, 0 -40px 35px #973716, 5px -45px 40px #451b0e;color:black">
-        {% else %}
-            <div id="heatHeader">
-        {% endif %}
-            Heat Control</div>
-        <div id="chartContainer"></div>
+            {% if heat_on %}
+                <div id="heatHeader" style="text-shadow: 0 0 10px #fefcc9, 5px -5px 15px #feec85, -10px -10px 20px #ffae34, 10px -20px 25px #ec760c, -10px -30px 30px #cd4606, 0 -40px 35px #973716, 5px -45px 40px #451b0e;color:black">
+                Heat Control</div>
+            {% else %}
+                <div id="heatHeader">Heat Control</div>
+            {% endif %}
+
+            <div id="chartContainer"></div>
     </div>
 </div>
 </body>

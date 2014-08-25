@@ -125,7 +125,8 @@ def check_weather():
             print(precip)
             f.close()
     else:
-        templateData['temp_f'] = weather_test
+        templateData['temp'] = weather_test
+        precip = True
 
 
 def write_log(message, on_off):
