@@ -50,7 +50,7 @@ a{
     left:80px;
 }
 
-input[type=text], input[type=time], input[type=number]{
+input[type=date], input[type=time], input[type=number]{
     height:30px;
     border-radius: 5px;
     border:1px solid #1d1d1d;
@@ -59,11 +59,11 @@ input[type=text], input[type=time], input[type=number]{
     -moz-appearance:textfield;
 }
 
-input[type=text]:hover, input[type=time]:hover, input[type=number]:hover{
+input[type=date]:hover, input[type=time]:hover, input[type=number]:hover{
     background-color: #494949;
 }
 
-input[type=text]:focus, input[type=time]:focus, input[type=number]:focus{
+input[type=date]:focus, input[type=time]:focus, input[type=number]:focus{
     box-shadow: 0 0 10px #1fc412;
     background-color: #494949;
 }
@@ -96,7 +96,7 @@ input[type=submit]:active{
 
 #manControl {
     width:100%;
-    height:60px;
+    height:80px;
     border-top:1px solid black;
     position: absolute;
     bottom:2px;
@@ -107,26 +107,31 @@ input[type=submit]:active{
 #man{
     position:absolute;
     top:15px;
-    left:135px;
+    left:116px;
     width:100px;
 }
 
 #onOffButton{
     position: absolute;
     right:2px;
-    bottom: 2px;
+    bottom: 10px;
 }
 
 .button {
     width: 120px;
     height: 50px;
     text-align: center;
-    line-height: 50px;
-    vertical-align: middle;
     color:white;
     text-shadow: 2px 2px 4px #111;
     border-radius: 2px;
     font-family: Arial,sans-serif;
+    display: table;
+}
+
+.button span {
+    display: table-cell;
+    vertical-align: middle;
+    height:20px;
 }
 
 #manualOn, #start{
@@ -189,6 +194,7 @@ input[type=submit]:active{
     bottom: 15px;
     left: 15px;
     background-color: rgba(2,2,2,.5);
+    box-shadow: 0 0 8px red;
 }
 
 #heatSection{

@@ -12,12 +12,12 @@ heat_pin = 7
 
 templateData = {
     'temp': 0.0,
-    'heat_on': True,
+    'heat_on': False,
     'lights_on': False,
     'lights_on_time': 0,
     'log': {},
-    'sunset_hour': 13,
-    'sunset_minute': 58,
+    'sunset_hour': 20,
+    'sunset_minute': 00,
     'start_date': '8/20/2014',
     'lights_off_time': '22:30',
     'settings_set': False,
@@ -223,6 +223,8 @@ def get_start_time():
         templateData['sunset_minute'] -= 60
         templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
         templateData['sunset_hour'] += 1
+    elif templateData['sunset_minute'] < 0:
+        templateData['sunset_minute'] = '00'
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
 
 #check_weather()
@@ -243,6 +245,8 @@ try:
             templateData['start_date'] = start_date
             templateData['settings_set'] = True
             templateData['message'] = ''
+            if templateData['light_program_running']:
+                return redirect(url_for('stop_program'))
         else:
             templateData['message'] = "Set date for a day in the future"
         if request.form['off_time'] != "":
@@ -287,7 +291,7 @@ try:
         if on_pi:
             GPIO.output(lights_pin, False)
         else:
-             print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),
+            print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),
                                                  length if int(length) > 0 else ''))
         templateData['lights_on'] = True
         if int(length) > 0:
