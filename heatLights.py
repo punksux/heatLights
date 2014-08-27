@@ -22,7 +22,7 @@ templateData = {
     'lights_off_time': '22:30',
     'settings_set': False,
     'light_program_running': False,
-    'message': "Everything OK",
+    'message': '',
 }
 
 # Imports
@@ -41,10 +41,9 @@ sched = Scheduler()
 sched.start()
 
 # Set up logging
-my_logger = logging.getLogger('MyLogger')
-handler = logging.handlers.RotatingFileHandler('errors.log', maxBytes=1000000, backupCount=3)
-handler.setLevel(logging.DEBUG)
-my_logger.addHandler(handler)
+#open('errors.log', 'w').close()
+logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if platform.uname()[0] != 'Windows':
     print(platform.uname()[0])
@@ -66,12 +65,10 @@ app = Flask(__name__)
 
 #Set up GPIO
 if on_pi:
-    GPIO.setup(7, GPIO.OUT)
-    GPIO.setup(11, GPIO.OUT)
-    GPIO.setup(13, GPIO.OUT)
-    GPIO.output(7, True)
-    GPIO.output(11, True)
-    GPIO.output(13, True)
+    GPIO.setup(lights_pin, GPIO.OUT)
+    GPIO.setup(heat_pin, GPIO.OUT)
+    GPIO.output(lights_pin, True)
+    GPIO.output(heat_pin, True)
 
 
 def check_weather():
@@ -86,24 +83,24 @@ def check_weather():
                 f = urllib2.urlopen(weather_website, timeout=3)
                 something_wrong = False
             except urllib2.URLError as e:
-                my_logger.error('%s - Data not retrieved because %s' % datetime.now().strftime('%m/%d/%Y %I:%M %p'), e)
+                logging.error('Data not retrieved because %s' % e)
                 something_wrong = True
             except socket.timeout:
-                my_logger.error('%s - Socket timed out' % datetime.now().strftime('%m/%d/%Y %I:%M %p'))
+                logging.error('Socket timed out')
                 something_wrong = True
         else:
             try:
                 f = urlopen(weather_website, timeout=3)
                 something_wrong = False
             except urllib.error.URLError as e:
-                my_logger.error('%s - Data not retrieved because %s' % datetime.now().strftime('%m/%d/%Y %I:%M %p'), e)
+                logging.error('Data not retrieved because %s' % e)
                 something_wrong = True
             except timeout:
-                my_logger.error('%s - Socket timed out' % datetime.now().strftime('%m/%d/%Y %I:%M %p'))
+                logging.error('Socket timed out')
                 something_wrong = True
 
         if something_wrong:
-            my_logger.error("%s - No Internet" % datetime.now().strftime('%m/%d/%Y %I:%M %p'))
+            logging.error("No Internet")
             templateData['temp'] = 0.0
         else:
             json_string = f.read()
@@ -111,11 +108,12 @@ def check_weather():
             old_temp = templateData['temp']
             templateData['temp'] = parsed_json['current_observation']['temp_f']
             print(str(old_temp) + " - " + str(templateData['temp']))
+
             templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
             templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
-            print(parsed_json['current_observation']['weather'])
 
-            weather = parsed_json['current_observation']['weather']
+            print(parsed_json['current_observation']['weather'])
+            weather = parsed_json['current_observation']['weather'].lower()
             precip_check = ['rain', 'snow', 'drizzle']
             if any(x in weather for x in precip_check):
                 precip = True
@@ -146,7 +144,7 @@ def write_log(message, on_off):
 
 def turn_on_heat():
     check_weather()
-    if (templateData['temp'] < 34 and old_temp > 38) or (templateData['temp'] < 34 and precip):
+    if (templateData['temp'] < 34 and old_temp > 38) or (templateData['temp'] < 36 and precip):
         if on_pi:
             GPIO.output(heat_pin, False)
         else:
@@ -201,8 +199,8 @@ def turn_off_lights():
 
 def pre_lights():
     get_start_time()
-    job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=templateData['sunset_hour'],
-                                                                    minute=templateData['sunset_minute']))
+    job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=int(templateData['sunset_hour']),
+                                                                    minute=int(templateData['sunset_minute'])))
 
 
 def manual_lights_off():
@@ -223,8 +221,11 @@ def get_start_time():
         templateData['sunset_minute'] -= 60
         templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
         templateData['sunset_hour'] += 1
+    elif 10 > templateData['sunset_minute'] > 0:
+        templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
     elif templateData['sunset_minute'] < 0:
         templateData['sunset_minute'] = '00'
+
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
 
 #check_weather()
