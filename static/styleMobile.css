@@ -90,6 +90,30 @@ input[type=submit]{
     z-index: -1;
 }
 
+#navArrows{
+    position: absolute;
+   left:348px;
+    top:200px;
+    width:24px;
+    z-index: 4;
+}
+
+#navRight{
+    float:left;
+    border-style: solid;
+    border-width: 100px 0 100px 12px;
+    border-color: transparent transparent transparent #99c99f;
+    left:0;
+}
+
+#navLeft {
+    float:right;
+    border-style: solid;
+    border-width: 100px 12px 100px 0;
+    border-color: transparent #cc8686 transparent transparent;
+    right:0;
+}
+
 #b8 {
     left:340px;
     top:10px;

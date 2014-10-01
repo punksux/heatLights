@@ -25,7 +25,7 @@
 
 .lights_off_red {
     background: #dd0003;
-    background: -moz-radial-gradient(4px 4px, ellipse cover, #dd0003 0%, #7f181d 100%);
+    background: -moz-radial-gradient(center, ellipse cover, rgba(221,0,3,0.75) 0%, rgba(127,24,29,0.75) 100%);
     background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#dd0003), color-stop(100%,#7f181d));
     background: -webkit-radial-gradient(center, ellipse cover, #dd0003 0%,#7f181d 100%);
 }
@@ -100,7 +100,7 @@
 
 .lights_off_orange {
     background: #924b11;
-    background: -moz-radial-gradient(4px 4px, ellipse cover, #f08806 0%, #924b11 100%);
+    background: -moz-radial-gradient(center, ellipse cover, rgba(240,136,6,0.75) 0%, rgba(146,75,17,0.75) 100%);
     background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#F08806), color-stop(100%,#924b11));
     background: -webkit-radial-gradient(center, ellipse cover, #F08806 0%,#924b11 100%);
 }

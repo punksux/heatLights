@@ -7,6 +7,7 @@ heat_program_running = False
 light_program_has_run = False
 old_temp = 0.0
 precip = False
+#GPIO Pin Setup
 lights_pin = 13
 heat_pin = 7
 
@@ -23,6 +24,7 @@ templateData = {
     'settings_set': False,
     'light_program_running': False,
     'message': '',
+    'timer': 0,
 }
 
 # Imports
@@ -208,6 +210,7 @@ def manual_lights_off():
             GPIO.output(lights_pin, True)
         else:
             print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+        templateData['timer'] = 0
         templateData['lights_on'] = False
 
 
@@ -228,7 +231,11 @@ def get_start_time():
 
     templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
 
-#check_weather()
+# **End Lights
+
+if on_pi:
+    check_weather()
+
 try:
 
     @app.route('/')
@@ -273,7 +280,6 @@ try:
                 print(e)
                 print('time has past')
             templateData['light_program_running'] = True
-
             return redirect(url_for('my_form'))
 
     @app.route("/lightsStop")
@@ -285,6 +291,7 @@ try:
             else:
                 sched.unschedule_job(lights_start)
             templateData['light_program_running'] = False
+            templateData['timer'] = 0
             return redirect(url_for('my_form'))
 
     @app.route("/lightsOn/<length>")
@@ -298,6 +305,7 @@ try:
         if int(length) > 0:
             temp = datetime.now() + timedelta(seconds=(int(length)*60))
             man_job = sched.add_date_job(manual_lights_off, temp)
+            templateData['timer'] = length
         return redirect(url_for('my_form'))
 
     @app.route("/lightsOff")
@@ -307,6 +315,7 @@ try:
         else:
             print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
         templateData['lights_on'] = False
+        templateData['timer'] = 0
         return redirect(url_for('my_form'))
 
     if __name__ == '__main__':
