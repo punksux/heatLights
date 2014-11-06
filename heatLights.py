@@ -16,7 +16,7 @@ templateData = {
     'heat_on': False,
     'lights_on': False,
     'lights_on_time': 0,
-    'log': {},
+    'log': '',
     'sunset_hour': 20,
     'sunset_minute': 00,
     'start_date': '8/20/2014',
@@ -28,7 +28,7 @@ templateData = {
 }
 
 # Imports
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, url_for, redirect, jsonify
 from datetime import datetime, timedelta
 import os
 import platform
@@ -38,6 +38,9 @@ import logging
 import logging.handlers
 import json
 import random
+from urllib.request import urlopen
+import urllib.error
+import time
 
 sched = Scheduler()
 sched.start()
@@ -54,13 +57,7 @@ else:
     print(platform.uname()[0])
 
 if on_pi:
-    import urllib2
     import RPi.GPIO as GPIO
-    import socket
-else:
-    from urllib.request import urlopen
-    import urllib.error
-
 
 #Set up Flask
 app = Flask(__name__)
@@ -80,26 +77,15 @@ def check_weather():
         global something_wrong
         global f
         weather_website = ('http://api.wunderground.com/api/c5e9d80d2269cb64/conditions/astronomy/q/%s.json' % location)
-        if on_pi:
-            try:
-                f = urllib2.urlopen(weather_website, timeout=3)
-                something_wrong = False
-            except urllib2.URLError as e:
-                logging.error('Data not retrieved because %s' % e)
-                something_wrong = True
-            except socket.timeout:
-                logging.error('Socket timed out')
-                something_wrong = True
-        else:
-            try:
-                f = urlopen(weather_website, timeout=3)
-                something_wrong = False
-            except urllib.error.URLError as e:
-                logging.error('Data not retrieved because %s' % e)
-                something_wrong = True
-            except timeout:
-                logging.error('Socket timed out')
-                something_wrong = True
+        try:
+            f = urlopen(weather_website, timeout=3)
+            something_wrong = False
+        except urllib.error.URLError as e:
+            logging.error('Data not retrieved because %s' % e)
+            something_wrong = True
+        except timeout:
+            logging.error('Socket timed out')
+            something_wrong = True
 
         if something_wrong:
             logging.error("No Internet")
@@ -108,7 +94,7 @@ def check_weather():
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
             old_temp = templateData['temp']
-            templateData['temp'] = parsed_json['current_observation']['temp_f']
+            templateData['temp'] = get_temps_from_probes()
             print(str(old_temp) + " - " + str(templateData['temp']))
 
             templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
@@ -128,6 +114,34 @@ def check_weather():
         templateData['temp'] = weather_test
         precip = True
 
+#######  --== Get Temps ==--  #######
+if on_pi:
+    os.system('modprobe w1-gpio')
+    os.system('modprobe w1-therm')
+temperature_file = '/sys/bus/w1/devices/28-0004749a3dff/w1_slave'
+
+
+def get_temps_from_probes():
+    if on_pi:
+        y = open(temperature_file, 'r')
+        lines = y.readlines()
+        y.close()
+
+        if lines[0].strip()[-3:] != 'YES':
+            print('No temp from sensor.')
+            time.sleep(5)
+            get_temps_from_probes()
+        else:
+            equals_pos = lines[1].find('t=')
+            if equals_pos != -1:
+                temp_string = lines[1][equals_pos+2:]
+                temp_c = float(temp_string) / 1000.0
+                in_temp = temp_c * 9.0 / 5.0 + 32.0
+                return in_temp
+
+    else:
+        return str(random.randrange(-32, 104))
+
 
 def write_log(message, on_off):
     if on_off:
@@ -141,9 +155,8 @@ def write_log(message, on_off):
     r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + '\n')
     r.close()
 
+
 # **Start Heat
-
-
 def turn_on_heat():
     check_weather()
     if (templateData['temp'] < 34 and old_temp > 38) or (templateData['temp'] < 36 and precip):
@@ -170,9 +183,9 @@ else:
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
 
 # **End Heat
+
+
 # **Start Lights
-
-
 def turn_on_lights():
     global light_program_has_run
     if on_pi:
@@ -181,12 +194,12 @@ def turn_on_lights():
         print('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = True
     light_program_has_run = True
+    templateData['off_time'] = datetime.strptime(templateData['off_time'], '%H:%M') + timedelta(
+        seconds=(random.randint(0, 10)*random.randint(-1, 1))*60)
+
+    templateData['off_time'] = templateData['off_time'].strftime('%H:%M')
     split = templateData['off_time'].split(':')
-    rand = split[1] + random.randint(0, 10)
-    if rand > 59:
-        split[0] += 1
-        rand -= 60
-    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=rand))
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=split[1]))
 
 
 def turn_off_lights():
@@ -215,21 +228,15 @@ def manual_lights_off():
 
 
 def get_start_time():
-    if random.randint(0, 1) == 1:
-        pos_neg = -1
-    else:
-        pos_neg = 1
-    templateData['sunset_minute'] = int(templateData['sunset_minute'])+(random.randint(1, 10)*pos_neg)
-    if templateData['sunset_minute'] > 59:
-        templateData['sunset_minute'] -= 60
-        templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
-        templateData['sunset_hour'] += 1
-    elif 10 > templateData['sunset_minute'] > 0:
-        templateData['sunset_minute'] = '0' + str(templateData['sunset_minute'])
-    elif templateData['sunset_minute'] < 0:
-        templateData['sunset_minute'] = '00'
-
-    templateData['lights_on_time'] = str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute'])
+    start_time = datetime.strptime(str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute']), '%H:%M')
+    print(start_time.strftime('%H:%M'))
+    random_time = random.randint(1, 10)*random.randint(-1, 1)
+    start_time += timedelta(seconds=random_time*60)
+    print(start_time.strftime('%H:%M'))
+    templateData['sunset_hour'] = start_time.strftime('%H')
+    templateData['sunset_minute'] = start_time.strftime('%M')
+    templateData['lights_on_time'] = start_time.strftime('%I:%M %p')
+    print(templateData['lights_on_time'])
 
 # **End Lights
 
@@ -237,10 +244,10 @@ if on_pi:
     check_weather()
 
 try:
-
     @app.route('/')
     def my_form():
-        templateData['log'] = [log.rstrip('\n') for log in open('log.log')]
+        log = [log.rstrip('\n') for log in open('log.log')]
+        templateData['log'] = json.dumps(log[len(log)-17:])
         return render_template("index.html", **templateData)
 
     @app.route('/', methods=['POST'])
@@ -294,8 +301,11 @@ try:
             templateData['timer'] = 0
             return redirect(url_for('my_form'))
 
-    @app.route("/lightsOn/<length>")
-    def lights_on(length):
+    @app.route("/lightsOn", methods=['POST'])
+    def lights_on():
+        length = request.form.get('length', 'something is wrong', type=str)
+        if length == '': length = '0'
+        print(length)
         if on_pi:
             GPIO.output(lights_pin, False)
         else:
@@ -305,8 +315,7 @@ try:
         if int(length) > 0:
             temp = datetime.now() + timedelta(seconds=(int(length)*60))
             man_job = sched.add_date_job(manual_lights_off, temp)
-            templateData['timer'] = length
-        return redirect(url_for('my_form'))
+        return jsonify({'length': length})
 
     @app.route("/lightsOff")
     def lights_off():
@@ -323,6 +332,7 @@ try:
 
 finally:
     print('Quitting')
-    sched.shutdown()
+    sched.shutdown(wait=False)
     if on_pi:
-        GPIO.cleanup()
+        GPIO.setup(lights_pin, GPIO.IN)
+        GPIO.setup(heat_pin, GPIO.IN)

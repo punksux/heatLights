@@ -7,6 +7,9 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <script type="text/javascript">
         window.onload = function () {
+            var log = {{ log|safe }};
+            console.log(log[0].split('|')[1]);
+
             var chart = new CanvasJS.Chart("chartContainer",{
                 backgroundColor: "#222",
                 animationEnabled: true,
@@ -40,22 +43,22 @@
                     label: "",
                     axisYType: "secondary",
                     dataPoints: [
-    {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-13].split('|')[0] }}),y: parseFloat("{{ log[log|count-13].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-12].split('|')[0] }}),y: parseFloat("{{ log[log|count-12].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-11].split('|')[0] }}),y: parseFloat("{{ log[log|count-11].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-10].split('|')[0] }}),y: parseFloat("{{ log[log|count-10].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-9].split('|')[0] }}),y: parseFloat("{{ log[log|count-9].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-8].split('|')[0] }}),y: parseFloat("{{ log[log|count-8].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-7].split('|')[0] }}),y: parseFloat("{{ log[log|count-7].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-6].split('|')[0] }}),y: parseFloat("{{ log[log|count-6].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-5].split('|')[0] }}),y: parseFloat("{{ log[log|count-5].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-4].split('|')[0] }}),y: parseFloat("{{ log[log|count-4].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[2] }}")},
-    {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[2] }}")}
+                        {x: new Date(log[log.length-16].split('|')[0]),y: parseFloat(log[log.length-16].split('|')[2])},
+                        {x: new Date(log[log.length-15].split('|')[0]),y: parseFloat(log[log.length-15].split('|')[2])},
+                        {x: new Date(log[log.length-14].split('|')[0]),y: parseFloat(log[log.length-14].split('|')[2])},
+                        {x: new Date(log[log.length-13].split('|')[0]),y: parseFloat(log[log.length-13].split('|')[2])},
+                        {x: new Date(log[log.length-12].split('|')[0]),y: parseFloat(log[log.length-12].split('|')[2])},
+                        {x: new Date(log[log.length-11].split('|')[0]),y: parseFloat(log[log.length-11].split('|')[2])},
+                        {x: new Date(log[log.length-10].split('|')[0]),y: parseFloat(log[log.length-10].split('|')[2])},
+                        {x: new Date(log[log.length-9].split('|')[0]),y: parseFloat(log[log.length-9].split('|')[2])},
+                        {x: new Date(log[log.length-8].split('|')[0]),y: parseFloat(log[log.length-8].split('|')[2])},
+                        {x: new Date(log[log.length-7].split('|')[0]),y: parseFloat(log[log.length-7].split('|')[2])},
+                        {x: new Date(log[log.length-6].split('|')[0]),y: parseFloat(log[log.length-6].split('|')[2])},
+                        {x: new Date(log[log.length-5].split('|')[0]),y: parseFloat(log[log.length-5].split('|')[2])},
+                        {x: new Date(log[log.length-4].split('|')[0]),y: parseFloat(log[log.length-4].split('|')[2])},
+                        {x: new Date(log[log.length-3].split('|')[0]),y: parseFloat(log[log.length-3].split('|')[2])},
+                        {x: new Date(log[log.length-2].split('|')[0]),y: parseFloat(log[log.length-2].split('|')[2])},
+                        {x: new Date(log[log.length-1].split('|')[0]),y: parseFloat(log[log.length-1].split('|')[2])}
                     ]
                 },
                 {
@@ -66,26 +69,25 @@
                     type: "splineArea",
                     color: "rgba(54,158,173,0.95)",
                     dataPoints: [
-    {x: new Date({{ log[log|count-16].split('|')[0] }}),y: parseFloat("{{ log[log|count-16].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-15].split('|')[0] }}),y: parseFloat("{{ log[log|count-15].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-14].split('|')[0] }}),y: parseFloat("{{ log[log|count-14].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-13].split('|')[0] }}),y: parseFloat("{{ log[log|count-13].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-12].split('|')[0] }}),y: parseFloat("{{ log[log|count-12].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-11].split('|')[0] }}),y: parseFloat("{{ log[log|count-11].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-10].split('|')[0] }}),y: parseFloat("{{ log[log|count-10].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-9].split('|')[0] }}),y: parseFloat("{{ log[log|count-9].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-8].split('|')[0] }}),y: parseFloat("{{ log[log|count-8].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-7].split('|')[0] }}),y: parseFloat("{{ log[log|count-7].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-6].split('|')[0] }}),y: parseFloat("{{ log[log|count-6].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-5].split('|')[0] }}),y: parseFloat("{{ log[log|count-5].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-4].split('|')[0] }}),y: parseFloat("{{ log[log|count-4].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-3].split('|')[0] }}),y: parseFloat("{{ log[log|count-3].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-2].split('|')[0] }}),y: parseFloat("{{ log[log|count-2].split('|')[1] }}")},
-    {x: new Date({{ log[log|count-1].split('|')[0] }}),y: parseFloat("{{ log[log|count-1].split('|')[1] }}")}
+                        {x: new Date(log[log.length-16].split('|')[0]),y: parseFloat(log[log.length-16].split('|')[1])},
+                        {x: new Date(log[log.length-15].split('|')[0]),y: parseFloat(log[log.length-15].split('|')[1])},
+                        {x: new Date(log[log.length-14].split('|')[0]),y: parseFloat(log[log.length-14].split('|')[1])},
+                        {x: new Date(log[log.length-13].split('|')[0]),y: parseFloat(log[log.length-13].split('|')[1])},
+                        {x: new Date(log[log.length-12].split('|')[0]),y: parseFloat(log[log.length-12].split('|')[1])},
+                        {x: new Date(log[log.length-11].split('|')[0]),y: parseFloat(log[log.length-11].split('|')[1])},
+                        {x: new Date(log[log.length-10].split('|')[0]),y: parseFloat(log[log.length-10].split('|')[1])},
+                        {x: new Date(log[log.length-9].split('|')[0]),y: parseFloat(log[log.length-9].split('|')[1])},
+                        {x: new Date(log[log.length-8].split('|')[0]),y: parseFloat(log[log.length-8].split('|')[1])},
+                        {x: new Date(log[log.length-7].split('|')[0]),y: parseFloat(log[log.length-7].split('|')[1])},
+                        {x: new Date(log[log.length-6].split('|')[0]),y: parseFloat(log[log.length-6].split('|')[1])},
+                        {x: new Date(log[log.length-5].split('|')[0]),y: parseFloat(log[log.length-5].split('|')[1])},
+                        {x: new Date(log[log.length-4].split('|')[0]),y: parseFloat(log[log.length-4].split('|')[1])},
+                        {x: new Date(log[log.length-3].split('|')[0]),y: parseFloat(log[log.length-3].split('|')[1])},
+                        {x: new Date(log[log.length-2].split('|')[0]),y: parseFloat(log[log.length-2].split('|')[1])},
+                        {x: new Date(log[log.length-1].split('|')[0]),y: parseFloat(log[log.length-1].split('|')[1])}
                     ]
         }]});
         chart.render();
-
     }
     </script>
     <script type="text/javascript" src="/static/canvasjs.min.js"></script>
@@ -98,6 +100,7 @@
         snowStorm.followMouse = false;
         snowStorm.snowCharacter = '*';
         snowStorm.autoStart = true;
+        snowStorm.stop()
     </script>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="/static/style.css">
@@ -114,58 +117,62 @@
 </head>
 
 <body>
-<input id="timer" value={{ timer }} />
-<script>
-	if (parseInt(document.getElementById("timer").value) > 0){
-			setTimeout('window.location.reload(true)',(parseInt(document.getElementById("timer").value)*60000) )
-		}
-</script>
-<div id="content">
-	<div id="bulbs">
-		{% for x in range(1,19) %}
-			<div id="base{{ x }}" class="bases"></div>
-		{% endfor %}
-	{% if lights_on %}
-		<div class="bulb lights_on_red" id="b1"></div>
-		<div class="bulb lights_on_blue" id="b2"></div>
-		<div class="bulb lights_on_yellow" id="b3"></div>
-		<div class="bulb lights_on_green" id="b4"></div>
-		<div class="bulb lights_on_purple" id="b5"></div>
-		<div class="bulb lights_on_orange" id="b6"></div>
-		<div class="bulb lights_on_red" id="b7"></div>
-		<div class="bulb lights_on_blue" id="b8"></div>
-		<div class="bulb lights_on_yellow" id="b9"></div>
-		<div class="bulb lights_on_green" id="b10"></div>
-		<div class="bulb lights_on_purple" id="b11"></div>
-		<div class="bulb lights_on_orange" id="b12"></div>
-		<div class="bulb lights_on_red" id="b13"></div>
-		<div class="bulb lights_on_blue" id="b14"></div>
-		<div class="bulb lights_on_yellow" id="b15"></div>
-		<div class="bulb lights_on_green" id="b16"></div>
-		<div class="bulb lights_on_purple" id="b17"></div>
-		<div class="bulb lights_on_orange" id="b18"></div>
-	{% else %}
-		<div class="bulb lights_off_red" id="b1"></div>
-		<div class="bulb lights_off_blue" id="b2"></div>
-		<div class="bulb lights_off_yellow" id="b3"></div>
-		<div class="bulb lights_off_green" id="b4"></div>
-		<div class="bulb lights_off_purple" id="b5"></div>
-		<div class="bulb lights_off_orange" id="b6"></div>
-		<div class="bulb lights_off_red" id="b7"></div>
-		<div class="bulb lights_off_blue" id="b8"></div>
-		<div class="bulb lights_off_yellow" id="b9"></div>
-		<div class="bulb lights_off_green" id="b10"></div>
-		<div class="bulb lights_off_purple" id="b11"></div>
-		<div class="bulb lights_off_orange" id="b12"></div>
-		<div class="bulb lights_off_red" id="b13"></div>
-		<div class="bulb lights_off_blue" id="b14"></div>
-		<div class="bulb lights_off_yellow" id="b15"></div>
-		<div class="bulb lights_off_green" id="b16"></div>
-		<div class="bulb lights_off_purple" id="b17"></div>
-		<div class="bulb lights_off_orange" id="b18"></div>
-	{% endif %}
-	</div>
+	<div id="bulbs"></div>
 
+    <script>
+        var x = 0;
+        var width = $( window ).width();
+        var colors = ['red', 'blue', 'yellow', 'green', 'purple', 'orange'];
+        var widthOfLogo = 350;
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        var j = 0;
+        for(var i = 10; i < width; i += getRandomInt(60, 90)){
+            if(i > ((width/2)-(widthOfLogo/2)) && i < ((width/2)+(widthOfLogo/2))) {
+
+            } else {
+                $('#bulbs').append('<div class="bulbHolder" style="left:' + i + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
+            }
+                j++;
+            if(j>5){j=0}
+        }
+
+        function turnOnLights() {
+            $('.bulb').addClass('lights_on');
+        }
+
+        function turnOffLights() {
+            $('.bulb').removeClass('lights_on');
+        }
+
+        var lightsOn = {{ lights_on|lower }};
+        if(lightsOn){
+            turnOnLights();
+        }
+
+        function manualLights(){
+            $.ajax(
+            {
+                type: 'post',
+                url: "/lightsOn",
+                data: {
+                    'length': $('#man').val()
+                }
+            })
+            .done(function(length){
+                turnOnLights();
+                console.log(length.length);
+                if(parseInt(length.length) > 0) {
+                    setTimeout(turnOffLights, parseInt(length.length)*1000*60);
+                }
+            });
+        }
+    </script>
+
+    <div id="content">
 	<div id="lightsSection">
 	<div id="lightsHeader"></div>
 	<div id="lightsSettings">
@@ -197,20 +204,9 @@
 		{% if lights_on %}
 			<a href="/lightsOff"><div id="manualOff" class="button"><span>Turn lights off</span></div></a>
 		{% else %}
-			<a href="#" onclick="GetURL();" id="manOn"><div id="manualOn" class="button"><span>Turn lights on</span></div></a>
+			<a href="#" onclick="manualLights();" id="manOn"><div id="manualOn" class="button"><span>Turn lights on</span></div></a>
 		{% endif %}
 	</div>
-	<script type="text/JavaScript">
-		function GetURL(){
-			var myAnchor = document.getElementById("manOn");
-			var myTextBox = document.getElementById("man");
-			if (myTextBox.value === "") {
-				myAnchor.href = "/lightsOn/0";
-			} else {
-				myAnchor.href = "/lightsOn/" + myTextBox.value;
-			}
-		}
-	</script>
 		</div>
 	</div>
 	{% if message != '' %}
