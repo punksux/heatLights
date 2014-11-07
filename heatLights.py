@@ -67,6 +67,7 @@ app = Flask(__name__)
 
 #Set up GPIO
 if on_pi:
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(lights_pin, GPIO.OUT)
     GPIO.setup(heat_pin, GPIO.OUT)
     GPIO.output(lights_pin, True)
