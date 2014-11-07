@@ -5,94 +5,114 @@
     <meta name="viewport" content="width=device-width,height=device-height,minimum-scale=1,maximum-scale=1"/>
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <script type="text/javascript" src="/static/canvasjs.min.js"></script>
+    <script src="/static/jquery-2.1.1.min.js"></script>
+    <script src="/static/jquery-ui.js"></script>
     <script type="text/javascript">
         window.onload = function () {
             var log = {{ log|safe }};
-            console.log(log[0].split('|')[1]);
+            var temps = [];
+            var heat = [];
 
-            var chart = new CanvasJS.Chart("chartContainer",{
+            for (var i = 16; i > 0; i--) {
+                heat.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][2])});
+                temps.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][1])});
+            }
+
+            var chart;
+            chart = new CanvasJS.Chart("chartContainer", {
                 backgroundColor: "#222",
                 animationEnabled: true,
                 toolTip: {
                     shared: "true"
                 },
-                legend:{
-                    fontColor:'white'
+                legend: {
+                    fontColor: 'white'
                 },
-                axisY:{
+                axisY: {
                     /*title:"Temp",*/
-                    valueFormatString:"##.#°",
+                    valueFormatString: "##.#°",
                     gridThickness: 1
                 },
-                axisX:{
-                    valueFormatString:"hh:mm"
+                axisX: {
+                    valueFormatString: "hh:mm"
                 },
                 axisY2: {
                     /*title: "Heat On",*/
                     interval: 1,
-                    minimum:0,
-                    maximum:1
+                    minimum: 0,
+                    maximum: 1
                 },
-                data: [{
-                    name: "Heat",
-                    showInLegend: true,
-                    legendMarkerType: "square",
-                    type: "stepArea",
-                    color: "rgba(255,0,0,.7)",
-                    markerSize: 0,
-                    label: "",
-                    axisYType: "secondary",
-                    dataPoints: [
-                        {x: new Date(log[log.length-16].split('|')[0]),y: parseFloat(log[log.length-16].split('|')[2])},
-                        {x: new Date(log[log.length-15].split('|')[0]),y: parseFloat(log[log.length-15].split('|')[2])},
-                        {x: new Date(log[log.length-14].split('|')[0]),y: parseFloat(log[log.length-14].split('|')[2])},
-                        {x: new Date(log[log.length-13].split('|')[0]),y: parseFloat(log[log.length-13].split('|')[2])},
-                        {x: new Date(log[log.length-12].split('|')[0]),y: parseFloat(log[log.length-12].split('|')[2])},
-                        {x: new Date(log[log.length-11].split('|')[0]),y: parseFloat(log[log.length-11].split('|')[2])},
-                        {x: new Date(log[log.length-10].split('|')[0]),y: parseFloat(log[log.length-10].split('|')[2])},
-                        {x: new Date(log[log.length-9].split('|')[0]),y: parseFloat(log[log.length-9].split('|')[2])},
-                        {x: new Date(log[log.length-8].split('|')[0]),y: parseFloat(log[log.length-8].split('|')[2])},
-                        {x: new Date(log[log.length-7].split('|')[0]),y: parseFloat(log[log.length-7].split('|')[2])},
-                        {x: new Date(log[log.length-6].split('|')[0]),y: parseFloat(log[log.length-6].split('|')[2])},
-                        {x: new Date(log[log.length-5].split('|')[0]),y: parseFloat(log[log.length-5].split('|')[2])},
-                        {x: new Date(log[log.length-4].split('|')[0]),y: parseFloat(log[log.length-4].split('|')[2])},
-                        {x: new Date(log[log.length-3].split('|')[0]),y: parseFloat(log[log.length-3].split('|')[2])},
-                        {x: new Date(log[log.length-2].split('|')[0]),y: parseFloat(log[log.length-2].split('|')[2])},
-                        {x: new Date(log[log.length-1].split('|')[0]),y: parseFloat(log[log.length-1].split('|')[2])}
-                    ]
-                },
-                {
-                    name:"Temp",
-                    showInLegend: true,
-                    legendMarkerType: "square",
-                    xValueType: "dateTime",
-                    type: "splineArea",
-                    color: "rgba(54,158,173,0.95)",
-                    dataPoints: [
-                        {x: new Date(log[log.length-16].split('|')[0]),y: parseFloat(log[log.length-16].split('|')[1])},
-                        {x: new Date(log[log.length-15].split('|')[0]),y: parseFloat(log[log.length-15].split('|')[1])},
-                        {x: new Date(log[log.length-14].split('|')[0]),y: parseFloat(log[log.length-14].split('|')[1])},
-                        {x: new Date(log[log.length-13].split('|')[0]),y: parseFloat(log[log.length-13].split('|')[1])},
-                        {x: new Date(log[log.length-12].split('|')[0]),y: parseFloat(log[log.length-12].split('|')[1])},
-                        {x: new Date(log[log.length-11].split('|')[0]),y: parseFloat(log[log.length-11].split('|')[1])},
-                        {x: new Date(log[log.length-10].split('|')[0]),y: parseFloat(log[log.length-10].split('|')[1])},
-                        {x: new Date(log[log.length-9].split('|')[0]),y: parseFloat(log[log.length-9].split('|')[1])},
-                        {x: new Date(log[log.length-8].split('|')[0]),y: parseFloat(log[log.length-8].split('|')[1])},
-                        {x: new Date(log[log.length-7].split('|')[0]),y: parseFloat(log[log.length-7].split('|')[1])},
-                        {x: new Date(log[log.length-6].split('|')[0]),y: parseFloat(log[log.length-6].split('|')[1])},
-                        {x: new Date(log[log.length-5].split('|')[0]),y: parseFloat(log[log.length-5].split('|')[1])},
-                        {x: new Date(log[log.length-4].split('|')[0]),y: parseFloat(log[log.length-4].split('|')[1])},
-                        {x: new Date(log[log.length-3].split('|')[0]),y: parseFloat(log[log.length-3].split('|')[1])},
-                        {x: new Date(log[log.length-2].split('|')[0]),y: parseFloat(log[log.length-2].split('|')[1])},
-                        {x: new Date(log[log.length-1].split('|')[0]),y: parseFloat(log[log.length-1].split('|')[1])}
-                    ]
-        }]});
-        chart.render();
-    }
+                data: [
+                    {
+                        name: "Heat",
+                        showInLegend: true,
+                        legendMarkerType: "square",
+                        type: "stepArea",
+                        color: "rgba(255,0,0,.7)",
+                        markerSize: 0,
+                        label: "",
+                        axisYType: "secondary",
+                        dataPoints: heat
+                    },
+                    {
+                        name: "Temp",
+                        showInLegend: true,
+                        legendMarkerType: "square",
+                        xValueType: "dateTime",
+                        type: "splineArea",
+                        color: "rgba(54,158,173,0.95)",
+                        dataPoints: temps
+                    }
+                ]});
+            chart.render();
+
+            function turnOnLights() {
+                $('.bulb').addClass('lights_on');
+                $('#onOffButton').html('<div id="manualOff" class="button"><span>Turn lights off</span></div>');
+                $('#manualOff').on('click', function(){
+                    manualLights('off');
+                });
+            }
+
+            function turnOffLights() {
+                $('#onOffButton').html('<div id="manualOn" class="button"><span>Turn lights on</span></div>');
+                $('.bulb').removeClass('lights_on');
+                $('#manualOn').on('click', function(){
+                    manualLights('on');
+                });
+            }
+
+            var lightsOn = {{ lights_on|lower }};
+            if (lightsOn) {
+                turnOnLights();
+            } else {
+                turnOffLights();
+            }
+
+            function manualLights(turn) {
+                $.ajax(
+                        {
+                            type: 'post',
+                            url: "/manLights",
+                            data: {
+                                'length': $('#man').val(),
+                                'turn': turn
+                            }
+                        })
+                        .done(function (rtn) {
+                            if (rtn.turn === 'on') {
+                                turnOnLights();
+                                if (parseInt(rtn.length) > 0) {
+                                    setTimeout(turnOffLights, parseInt(rtn.length) * 1000 * 60);
+                                }
+                            } else {
+                                turnOffLights()
+                            }
+                        });
+            }
+        }
     </script>
-    <script type="text/javascript" src="/static/canvasjs.min.js"></script>
-    <script src="/static/jquery-2.1.1.min.js"></script>
-    <script src="/static/jquery-ui.js"></script>
     <script src="/static/snowstorm-min.js"></script>
     <script>
         snowStorm.snowColor = '#ffffff';
@@ -135,40 +155,10 @@
 
             } else {
                 $('#bulbs').append('<div class="bulbHolder" style="left:' + i + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
-            }
                 j++;
-            if(j>5){j=0}
-        }
+                if(j>5){j=0}
+            }
 
-        function turnOnLights() {
-            $('.bulb').addClass('lights_on');
-        }
-
-        function turnOffLights() {
-            $('.bulb').removeClass('lights_on');
-        }
-
-        var lightsOn = {{ lights_on|lower }};
-        if(lightsOn){
-            turnOnLights();
-        }
-
-        function manualLights(){
-            $.ajax(
-            {
-                type: 'post',
-                url: "/lightsOn",
-                data: {
-                    'length': $('#man').val()
-                }
-            })
-            .done(function(length){
-                turnOnLights();
-                console.log(length.length);
-                if(parseInt(length.length) > 0) {
-                    setTimeout(turnOffLights, parseInt(length.length)*1000*60);
-                }
-            });
         }
     </script>
 
@@ -201,11 +191,12 @@
 	<div id="manControl">
 		<label for="man">Manual length:</label><input type="number" id="man">
 	<div id="onOffButton">
-		{% if lights_on %}
+        Ass
+       {#{% if lights_on %}
 			<a href="/lightsOff"><div id="manualOff" class="button"><span>Turn lights off</span></div></a>
 		{% else %}
 			<a href="#" onclick="manualLights();" id="manOn"><div id="manualOn" class="button"><span>Turn lights on</span></div></a>
-		{% endif %}
+		{% endif %}#}
 	</div>
 		</div>
 	</div>

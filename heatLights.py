@@ -247,7 +247,12 @@ try:
     @app.route('/')
     def my_form():
         log = [log.rstrip('\n') for log in open('log.log')]
-        templateData['log'] = json.dumps(log[len(log)-17:])
+        log = log[len(log)-17:]
+        log2 = []
+        for i in log:
+            date = datetime.strptime(i.split('|')[0], '%Y,%m,%d,%H,%M')
+            log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2]])
+        templateData['log'] = json.dumps(log2)
         return render_template("index.html", **templateData)
 
     @app.route('/', methods=['POST'])
@@ -301,31 +306,34 @@ try:
             templateData['timer'] = 0
             return redirect(url_for('my_form'))
 
-    @app.route("/lightsOn", methods=['POST'])
+    @app.route("/manLights", methods=['POST'])
     def lights_on():
+        global man_job
+        on_off = request.form.get('turn', 'something is wrong', type=str)
+        print(on_off)
         length = request.form.get('length', 'something is wrong', type=str)
-        if length == '': length = '0'
-        print(length)
-        if on_pi:
-            GPIO.output(lights_pin, False)
-        else:
-            print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),
-                                                 length if int(length) > 0 else ''))
-        templateData['lights_on'] = True
-        if int(length) > 0:
-            temp = datetime.now() + timedelta(seconds=(int(length)*60))
-            man_job = sched.add_date_job(manual_lights_off, temp)
-        return jsonify({'length': length})
+        if on_off == 'on':
+            if length == '': length = '0'
+            print(length)
+            if on_pi:
+                GPIO.output(lights_pin, False)
+            else:
+                print('%s - Manual lights on. %s' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'),
+                                                     length if int(length) > 0 else ''))
+            templateData['lights_on'] = True
+            if int(length) > 0:
+                temp = datetime.now() + timedelta(seconds=(int(length)*60))
+                man_job = sched.add_date_job(manual_lights_off, temp)
 
-    @app.route("/lightsOff")
-    def lights_off():
-        if on_pi:
-            GPIO.output(lights_pin, True)
-        else:
-            print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
-        templateData['lights_on'] = False
-        templateData['timer'] = 0
-        return redirect(url_for('my_form'))
+        elif on_off == 'off':
+            if on_pi:
+                GPIO.output(lights_pin, True)
+            else:
+                print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
+            templateData['lights_on'] = False
+            templateData['timer'] = 0
+
+        return jsonify({'length': length, 'turn': on_off})
 
     if __name__ == '__main__':
         app.run(host='0.0.0.0', port=5001)
