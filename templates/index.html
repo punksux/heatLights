@@ -13,9 +13,15 @@
             var log = {{ log|safe }};
             var temps = [];
             var heat = [];
+            var long;
 
-            for (var i = 16; i > 0; i--) {
-                heat.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][2])});
+            if (log.length < 16){
+                long = log.length
+            } else {
+                long = 16
+            }
+            for (var i = long; i > 0; i--) {
+                 heat.push({x: new Date(log[log.length - i][0]), y: parseInt(log[log.length - i][2])});
                 temps.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][1])});
             }
 
@@ -60,9 +66,14 @@
                         showInLegend: true,
                         legendMarkerType: "square",
                         xValueType: "dateTime",
-                        type: "splineArea",
+                        type: "spline",
                         color: "rgba(54,158,173,0.95)",
-                        dataPoints: temps
+                        dataPoints: temps,
+                        lineThickness: 4,
+                        markerSize: 10,
+                        markerColor: '#222',
+                        markerBorderColor: "rgba(54,158,173,0.95)",
+                        markerBorderThickness: 2
                     }
                 ]});
             chart.render();
@@ -154,7 +165,7 @@
             if(i > ((width/2)-(widthOfLogo/2)) && i < ((width/2)+(widthOfLogo/2))) {
 
             } else {
-                $('#bulbs').append('<div class="bulbHolder" style="left:' + i + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
+                $('#bulbs').append('<div class="bulbHolder" style="left:' + i + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);-webkit-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
                 j++;
                 if(j>5){j=0}
             }
@@ -172,6 +183,8 @@
 
 		<p>Lights off at: {{ lights_off_time }}</p>
 		<p>Starting on: {{ start_date }}</p>
+        <p>Uptime: {{ uptime }}</p>
+        <p>Heat on count: {{ heat_count }}</p>
 	</div>
 	<div id="lightsInput">
 	<form action="." method="POST">
@@ -190,15 +203,8 @@
 	   </div>
 	<div id="manControl">
 		<label for="man">Manual length:</label><input type="number" id="man">
-	<div id="onOffButton">
-        Ass
-       {#{% if lights_on %}
-			<a href="/lightsOff"><div id="manualOff" class="button"><span>Turn lights off</span></div></a>
-		{% else %}
-			<a href="#" onclick="manualLights();" id="manOn"><div id="manualOn" class="button"><span>Turn lights on</span></div></a>
-		{% endif %}#}
+	    <div id="onOffButton"> </div>
 	</div>
-		</div>
 	</div>
 	{% if message != '' %}
 		<div id="lightsMessage">

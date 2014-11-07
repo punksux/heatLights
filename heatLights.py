@@ -1,32 +1,3 @@
-location = "84123"
-on_pi = False
-weather_test = 200
-lights_start = None
-job = None
-heat_program_running = False
-light_program_has_run = False
-old_temp = 0.0
-precip = False
-#GPIO Pin Setup
-lights_pin = 13
-heat_pin = 7
-
-templateData = {
-    'temp': 0.0,
-    'heat_on': False,
-    'lights_on': False,
-    'lights_on_time': 0,
-    'log': '',
-    'sunset_hour': 20,
-    'sunset_minute': 00,
-    'start_date': '8/20/2014',
-    'lights_off_time': '22:30',
-    'settings_set': False,
-    'light_program_running': False,
-    'message': '',
-    'timer': 0,
-}
-
 # Imports
 from flask import Flask, request, render_template, url_for, redirect, jsonify
 from datetime import datetime, timedelta
@@ -42,13 +13,45 @@ from urllib.request import urlopen
 import urllib.error
 import time
 
+location = "84123"
+on_pi = False
+weather_test = 200
+lights_start = None
+job = None
+heat_program_running = False
+light_program_has_run = False
+old_temp = 0.0
+precip = False
+#GPIO Pin Setup
+lights_pin = 13
+heat_pin = 7
+uptime_counter = datetime.now()
+
+templateData = {
+    'temp': 0.0,
+    'heat_on': False,
+    'lights_on': False,
+    'lights_on_time': 0,
+    'log': '',
+    'sunset_hour': 10,
+    'sunset_minute': 40,
+    'start_date': '8/20/2014',
+    'lights_off_time': '22:30',
+    'settings_set': False,
+    'light_program_running': False,
+    'message': '',
+    'timer': 0,
+    'uptime': 0,
+    'heat_count': 0
+}
+
 sched = Scheduler()
 sched.start()
 
 # Set up logging
 #open('errors.log', 'w').close()
-logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+#logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
+                    #datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if platform.uname()[0] != 'Windows':
     print(platform.uname()[0])
@@ -89,7 +92,7 @@ def check_weather():
 
         if something_wrong:
             logging.error("No Internet")
-            templateData['temp'] = 0.0
+            #templateData['temp'] = 0.0
         else:
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
@@ -140,7 +143,7 @@ def get_temps_from_probes():
                 return in_temp
 
     else:
-        return str(random.randrange(-32, 104))
+        return random.randrange(-32, 104)
 
 
 def write_log(message, on_off):
@@ -165,6 +168,7 @@ def turn_on_heat():
         else:
             print('%s - Heat on: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = True
+        templateData['heat_count'] += 1
         write_log(templateData['temp'], True)
     else:
         if on_pi:
@@ -194,12 +198,12 @@ def turn_on_lights():
         print('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = True
     light_program_has_run = True
-    templateData['off_time'] = datetime.strptime(templateData['off_time'], '%H:%M') + timedelta(
+    templateData['lights_off_time'] = datetime.strptime(templateData['lights_off_time'], '%H:%M') + timedelta(
         seconds=(random.randint(0, 10)*random.randint(-1, 1))*60)
 
-    templateData['off_time'] = templateData['off_time'].strftime('%H:%M')
-    split = templateData['off_time'].split(':')
-    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=split[0], minute=split[1]))
+    templateData['lights_off_time'] = templateData['lights_off_time'].strftime('%H:%M')
+    split = templateData['lights_off_time'].split(':')
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=int(split[0]), minute=int(split[1])))
 
 
 def turn_off_lights():
@@ -243,6 +247,30 @@ def get_start_time():
 if on_pi:
     check_weather()
 
+
+def time_since(other_date):
+    dt = datetime.now() - other_date
+    offset = dt.seconds
+    delta_s = offset % 60
+    offset /= 60
+    delta_m = offset % 60
+    offset /= 60
+    delta_h = offset % 24
+    delta_d = dt.days
+
+    if delta_d >= 1:
+        return "%d %s, %d %s, %d %s" % (delta_d, "day" if 2 > delta_d > 1 else "days", delta_h,
+                                        "hour" if 2 > delta_h > 1 else "hours", delta_m,
+                                        "minute" if 2 > delta_m > 1 else "minutes")
+    if delta_h >= 1:
+        return "%d %s, %d %s" % (delta_h, "hour" if 2 > delta_h > 1 else "hours",
+                                 delta_m, "minute" if 2 > delta_m > 1 else "minutes")
+    if delta_m >= 1:
+        return "%d %s, %d %s" % (delta_m, "minute" if 2 > delta_m > 1 else "minutes", delta_s,
+                                 "second" if 2 > delta_s > 1 else "seconds")
+    else:
+        return "%d %s" % (delta_s, "second" if 2 > delta_s > 1 else "seconds")
+
 try:
     @app.route('/')
     def my_form():
@@ -253,6 +281,7 @@ try:
             date = datetime.strptime(i.split('|')[0], '%Y,%m,%d,%H,%M')
             log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2]])
         templateData['log'] = json.dumps(log2)
+        templateData['uptime'] = time_since(uptime_counter)
         return render_template("index.html", **templateData)
 
     @app.route('/', methods=['POST'])
@@ -313,7 +342,8 @@ try:
         print(on_off)
         length = request.form.get('length', 'something is wrong', type=str)
         if on_off == 'on':
-            if length == '': length = '0'
+            if length == '':
+                length = '0'
             print(length)
             if on_pi:
                 GPIO.output(lights_pin, False)

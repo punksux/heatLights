@@ -1,6 +1,6 @@
 
 #bulbs {
-    width:880px;
+    border: 1px solid white;
 }
 
 #content {
@@ -33,11 +33,12 @@ input[type=submit]{
 
 #startButton {
     right:83px;
+    top: 0;
 }
 
 #onOffButton {
     right:-6px;
-        bottom: 8px;
+    bottom: 8px;
 }
 
 .button {
@@ -57,7 +58,7 @@ input[type=submit]{
 
 #lightsSettings {
     width:310px;
-    top:330px;
+    top:315px;
     right:15px;
     text-align: center;
     border-top: 1px solid black;
@@ -112,14 +113,4 @@ input[type=submit]{
     border-width: 100px 12px 100px 0;
     border-color: transparent #cc8686 transparent transparent;
     right:0;
-}
-
-#b8 {
-    left:340px;
-    top:10px;
-}
-
-#base8{
-    left:343px;
-    top:-2px;
 }
