@@ -122,12 +122,13 @@ def check_weather():
 if on_pi:
     os.system('modprobe w1-gpio')
     os.system('modprobe w1-therm')
-temperature_file = '/sys/bus/w1/devices/28-0004749a3dff/w1_slave'
+long_temp_sensor = '/sys/bus/w1/devices/28-00047858c5ff/w1_slave'
+short_temp_sensor = '/sys/bus/w1/devices/28-00047355a1ff/w1_slave'
 
 
 def get_temps_from_probes():
     if on_pi:
-        y = open(temperature_file, 'r')
+        y = open(long_temp_sensor, 'r')
         lines = y.readlines()
         y.close()
 
