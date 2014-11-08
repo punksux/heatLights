@@ -25,7 +25,7 @@ def get_temps_from_probes():
             temp_string = lines[1][equals_pos+2:]
             temp_c = float(temp_string) / 1000.0
             in_temp = temp_c * 9.0 / 5.0 + 32.0
-            print('Long: ' + str(in_temp))
+            print('Long: ' + "{:.1f}".format(in_temp))
 
     if lines2[0].strip()[-3:] != 'YES':
         print('No temp from sensor.')
@@ -36,7 +36,7 @@ def get_temps_from_probes():
             temp_string = lines2[1][equals_pos+2:]
             temp_c = float(temp_string) / 1000.0
             in_temp = temp_c * 9.0 / 5.0 + 32.0
-            print('Short: ' + str(in_temp))
+            print('Short: ' + "{:.1f}".format(in_temp))
 
 while True:
     get_temps_from_probes()

@@ -24,7 +24,7 @@ old_temp = 0.0
 precip = False
 #GPIO Pin Setup
 lights_pin = 13
-heat_pin = 7
+heat_pin = 11
 uptime_counter = datetime.now()
 
 templateData = {
@@ -50,8 +50,8 @@ sched.start()
 
 # Set up logging
 #open('errors.log', 'w').close()
-#logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
-                    #datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if platform.uname()[0] != 'Windows':
     print(platform.uname()[0])
@@ -142,7 +142,7 @@ def get_temps_from_probes():
                 temp_string = lines[1][equals_pos+2:]
                 temp_c = float(temp_string) / 1000.0
                 in_temp = temp_c * 9.0 / 5.0 + 32.0
-                return in_temp
+                return "{:.1f}".format(in_temp)
 
     else:
         return random.randrange(-32, 104)
