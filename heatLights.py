@@ -142,7 +142,7 @@ def get_temps_from_probes():
                 temp_string = lines[1][equals_pos+2:]
                 temp_c = float(temp_string) / 1000.0
                 in_temp = temp_c * 9.0 / 5.0 + 32.0
-                return "{:.1f}".format(in_temp)
+                return in_temp
 
     else:
         return random.randrange(-32, 104)
@@ -164,21 +164,21 @@ def write_log(message, on_off):
 # **Start Heat
 def turn_on_heat():
     check_weather()
-    if (templateData['temp'] < 34 and old_temp > 38) or (templateData['temp'] < 36 and precip):
+    if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 36.0 and precip):
         if on_pi:
             GPIO.output(heat_pin, False)
         else:
             print('%s - Heat on: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = True
         templateData['heat_count'] += 1
-        write_log(templateData['temp'], True)
+        write_log("{:.1f}".format(templateData['temp']), True)
     else:
         if on_pi:
             GPIO.output(heat_pin, True)
         else:
             print('%s - Heat off: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = False
-        write_log(templateData['temp'], False)
+        write_log("{:.1f}".format(templateData['temp']), False)
 
 
 s = datetime.now()
