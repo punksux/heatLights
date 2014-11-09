@@ -128,7 +128,7 @@ short_temp_sensor = '/sys/bus/w1/devices/28-00047355a1ff/w1_slave'
 
 def get_temps_from_probes():
     if on_pi:
-        y = open(long_temp_sensor, 'r')
+        y = open(short_temp_sensor, 'r')
         lines = y.readlines()
         y.close()
 
