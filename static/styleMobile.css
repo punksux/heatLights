@@ -1,6 +1,10 @@
 
 #bulbs {
-    border: 1px solid white;
+    width:720px;
+}
+
+#fakeLogo {
+    width: 0;
 }
 
 #content {

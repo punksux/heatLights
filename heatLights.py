@@ -1,4 +1,4 @@
-# Imports
+####  --== Imports ==--  ####
 from flask import Flask, request, render_template, url_for, redirect, jsonify
 from datetime import datetime, timedelta
 import os
@@ -22,10 +22,12 @@ heat_program_running = False
 light_program_has_run = False
 old_temp = 0.0
 precip = False
-#GPIO Pin Setup
+uptime_counter = datetime.now()
+weather = ''
+
+####  --== GPIO Pin Setup ==--  ####
 lights_pin = 13
 heat_pin = 11
-uptime_counter = datetime.now()
 
 templateData = {
     'temp': 0.0,
@@ -48,8 +50,7 @@ templateData = {
 sched = Scheduler()
 sched.start()
 
-# Set up logging
-#open('errors.log', 'w').close()
+###  --== Set up logging ==--  ####
 logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -62,10 +63,10 @@ else:
 if on_pi:
     import RPi.GPIO as GPIO
 
-#Set up Flask
+####  --== Set up Flask ==--  ####
 app = Flask(__name__)
 
-#Set up GPIO
+####  --== Set up GPIO ==--  ####
 if on_pi:
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(lights_pin, GPIO.OUT)
@@ -74,9 +75,9 @@ if on_pi:
     GPIO.output(heat_pin, True)
 
 
+####  --== Get Weather ==--  ####
 def check_weather():
-    global old_temp
-    global precip
+    global old_temp, precip, weather
     if weather_test == 200:
         global something_wrong
         global f
@@ -93,11 +94,10 @@ def check_weather():
 
         if something_wrong:
             logging.error("No Internet")
-            #templateData['temp'] = 0.0
         else:
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
-            old_temp = templateData['temp']
+            old_temp = (templateData['temp'] + old_temp) / 2
             templateData['temp'] = get_temps_from_probes()
             print(str(old_temp) + " - " + str(templateData['temp']))
 
@@ -106,7 +106,7 @@ def check_weather():
 
             print(parsed_json['current_observation']['weather'])
             weather = parsed_json['current_observation']['weather'].lower()
-            precip_check = ['rain', 'snow', 'drizzle']
+            precip_check = ['rain', 'snow', 'drizzle', 'hail', 'ice', 'thunderstorm']
             if any(x in weather for x in precip_check):
                 precip = True
             else:
@@ -118,12 +118,12 @@ def check_weather():
         templateData['temp'] = weather_test
         precip = True
 
-#######  --== Get Temps ==--  #######
+####  --== Get Temps ==--  ####
 if on_pi:
     os.system('modprobe w1-gpio')
     os.system('modprobe w1-therm')
-long_temp_sensor = '/sys/bus/w1/devices/28-00047858c5ff/w1_slave'
-short_temp_sensor = '/sys/bus/w1/devices/28-00047355a1ff/w1_slave'
+    long_temp_sensor = '/sys/bus/w1/devices/28-00047858c5ff/w1_slave'
+    short_temp_sensor = '/sys/bus/w1/devices/28-00047355a1ff/w1_slave'
 
 
 def get_temps_from_probes():
@@ -148,7 +148,7 @@ def get_temps_from_probes():
         return random.randrange(-32, 104)
 
 
-def write_log(message, on_off):
+def write_log(message, on_off, weather):
     if on_off:
         on_off = "1"
     else:
@@ -157,11 +157,11 @@ def write_log(message, on_off):
         r = open('log.log', 'w')
     else:
         r = open('log.log', 'a')
-    r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + '\n')
+    r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather + '\n')
     r.close()
 
 
-# **Start Heat
+#### --== Start Heat ==-- ####
 def turn_on_heat():
     check_weather()
     if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 36.0 and precip):
@@ -171,14 +171,14 @@ def turn_on_heat():
             print('%s - Heat on: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = True
         templateData['heat_count'] += 1
-        write_log("{:.1f}".format(templateData['temp']), True)
+        write_log("{:.1f}".format(templateData['temp']), True, weather)
     else:
         if on_pi:
             GPIO.output(heat_pin, True)
         else:
             print('%s - Heat off: %s.\n' % (datetime.now().strftime('%m/%d/%Y %I:%M %p'), templateData['temp']))
         templateData['heat_on'] = False
-        write_log("{:.1f}".format(templateData['temp']), False)
+        write_log("{:.1f}".format(templateData['temp']), False, weather)
 
 
 s = datetime.now()
@@ -188,10 +188,10 @@ if s.minute > 30:
 else:
     sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
 
-# **End Heat
+#### --== End Heat ==-- ####
 
 
-# **Start Lights
+#### --== Start Lights ==-- ####
 def turn_on_lights():
     global light_program_has_run
     if on_pi:
@@ -244,7 +244,7 @@ def get_start_time():
     templateData['lights_on_time'] = start_time.strftime('%I:%M %p')
     print(templateData['lights_on_time'])
 
-# **End Lights
+#### --== End Lights ==-- ####
 
 if on_pi:
     check_weather()
@@ -277,22 +277,29 @@ try:
     @app.route('/')
     def my_form():
         log = [log.rstrip('\n') for log in open('log.log')]
-        log = log[len(log)-17:]
+        if len(log) > 16:
+            log = log[len(log)-17:]
         log2 = []
         for i in log:
-            date = datetime.strptime(i.split('|')[0], '%Y,%m,%d,%H,%M')
-            log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2]])
+            if i != '':
+                date = datetime.strptime(i.split('|')[0], '%Y,%m,%d,%H,%M')
+                log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2]])
         templateData['log'] = json.dumps(log2)
         templateData['uptime'] = time_since(uptime_counter)
         return render_template("index.html", **templateData)
 
     @app.route('/', methods=['POST'])
     def my_form_post():
-        if request.form['start_date'] != "" and datetime.strptime(request.form['start_date'] + " " +
-                                                                  str(templateData['sunset_hour']) + " " +
-                                                                  str(templateData['sunset_minute']),
-                                                                  '%m/%d/%Y %H %M') > datetime.now():
-            start_date = request.form['start_date']
+        start_date = request.form['start_date']
+        try:
+            start_date = datetime.strptime(start_date, '%m/%d/%Y')
+        except:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+
+        start_date = start_date.strftime('%m/%d/%Y')
+        if start_date != "" and datetime.strptime(start_date + " " + str(templateData['sunset_hour']) + " " +
+                                                  str(templateData['sunset_minute']),
+                                                  '%m/%d/%Y %H %M') > datetime.now():
             templateData['start_date'] = start_date
             templateData['settings_set'] = True
             templateData['message'] = ''
@@ -341,12 +348,10 @@ try:
     def lights_on():
         global man_job
         on_off = request.form.get('turn', 'something is wrong', type=str)
-        print(on_off)
         length = request.form.get('length', 'something is wrong', type=str)
         if on_off == 'on':
             if length == '':
                 length = '0'
-            print(length)
             if on_pi:
                 GPIO.output(lights_pin, False)
             else:

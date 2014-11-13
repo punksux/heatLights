@@ -66,7 +66,7 @@
                         showInLegend: true,
                         legendMarkerType: "square",
                         xValueType: "dateTime",
-                        type: "spline",
+                        type: "line",
                         color: "rgba(54,158,173,0.95)",
                         dataPoints: temps,
                         lineThickness: 4,
@@ -77,6 +77,27 @@
                     }
                 ]});
             chart.render();
+
+            var x = 0;
+            var width = $('div#bulbs').width();
+            var colors = ['red', 'blue', 'yellow', 'green', 'purple', 'orange'];
+            var widthOfLogo = $('div#fakeLogo').width();
+
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            var j = 0;
+            for(var p = getRandomInt(1, 15); p < width; p += getRandomInt(60, 90)){
+                if(p > ((width/2)-(widthOfLogo/2)) && p < ((width/2)+(widthOfLogo/2))) {
+
+                } else {
+                    $('#bulbs').append('<div class="bulbHolder" style="left:' + p + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);-webkit-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
+                    j++;
+                    if(j>5){j=0}
+                }
+
+            }
 
             function turnOnLights() {
                 $('.bulb').addClass('lights_on');
@@ -122,6 +143,7 @@
                             }
                         });
             }
+
         }
     </script>
     <script src="/static/snowstorm-min.js"></script>
@@ -148,30 +170,7 @@
 </head>
 
 <body>
-	<div id="bulbs"></div>
-
-    <script>
-        var x = 0;
-        var width = $( window ).width();
-        var colors = ['red', 'blue', 'yellow', 'green', 'purple', 'orange'];
-        var widthOfLogo = 350;
-
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        var j = 0;
-        for(var i = 10; i < width; i += getRandomInt(60, 90)){
-            if(i > ((width/2)-(widthOfLogo/2)) && i < ((width/2)+(widthOfLogo/2))) {
-
-            } else {
-                $('#bulbs').append('<div class="bulbHolder" style="left:' + i + ';-moz-transform:rotate(' + getRandomInt(-15, 15) + 'deg);-webkit-transform:rotate(' + getRandomInt(-15, 15) + 'deg);top:-' + getRandomInt(0, 4) + 'px"><div class="bases"></div><div class="bulb ' + colors[j] + '"></div></div>');
-                j++;
-                if(j>5){j=0}
-            }
-
-        }
-    </script>
+	<div id="bulbs"></div><div id="fakeLogo"></div>
 
     <div id="content">
 	<div id="lightsSection">
