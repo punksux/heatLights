@@ -180,10 +180,10 @@
 			<p>Lights on at: {{ lights_on_time }}</p>
 		{% endif %}
 
-		<p>Lights off at: {{ lights_off_time }}</p>
+		<p><a href="/static/errors.html">Lights off at: {{ lights_off_time }}</a></p>
 		<p>Starting on: {{ start_date }}</p>
         <p>Uptime: {{ uptime }}</p>
-        <p>Heat on count: {{ heat_count }}</p>
+        <p><a href="/static/log.html">Heat on count: {{ heat_count }}</a></p>
 	</div>
 	<div id="lightsInput">
 	<form action="." method="POST">

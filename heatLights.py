@@ -51,7 +51,9 @@ sched = Scheduler()
 sched.start()
 
 ###  --== Set up logging ==--  ####
-logging.basicConfig(filename='errors.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s: %(message)s',
+logging.basicConfig(filename='static/errors.html',
+                    level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if platform.uname()[0] != 'Windows':
@@ -153,10 +155,10 @@ def write_log(message, on_off, weather):
         on_off = "1"
     else:
         on_off = "0"
-    if os.path.getsize('log.log') > 1000000:
-        r = open('log.log', 'w')
+    if os.path.getsize('static/log.html') > 1000000:
+        r = open('static/log.html', 'w')
     else:
-        r = open('log.log', 'a')
+        r = open('static/log.html', 'a')
     r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather + '\n')
     r.close()
 
@@ -164,7 +166,7 @@ def write_log(message, on_off, weather):
 #### --== Start Heat ==-- ####
 def turn_on_heat():
     check_weather()
-    if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 36.0 and precip):
+    if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 34.0 and precip):
         if on_pi:
             GPIO.output(heat_pin, False)
         else:
@@ -261,17 +263,17 @@ def time_since(other_date):
     delta_d = dt.days
 
     if delta_d >= 1:
-        return "%d %s, %d %s, %d %s" % (delta_d, "day" if 2 > delta_d > 1 else "days", delta_h,
-                                        "hour" if 2 > delta_h > 1 else "hours", delta_m,
-                                        "minute" if 2 > delta_m > 1 else "minutes")
+        return "%d %s, %d %s, %d %s" % (delta_d, " day" if delta_d == 1 else " days", delta_h,
+                                        " hour" if 2 > delta_h > 1 else " hours", delta_m,
+                                        " minute" if 2 > delta_m > 1 else " minutes")
     if delta_h >= 1:
-        return "%d %s, %d %s" % (delta_h, "hour" if 2 > delta_h > 1 else "hours",
-                                 delta_m, "minute" if 2 > delta_m > 1 else "minutes")
+        return "%d %s, %d %s" % (delta_h, " hour" if 2 > delta_h > 1 else " hours",
+                                 delta_m, " minute" if 2 > delta_m > 1 else " minutes")
     if delta_m >= 1:
-        return "%d %s, %d %s" % (delta_m, "minute" if 2 > delta_m > 1 else "minutes", delta_s,
-                                 "second" if 2 > delta_s > 1 else "seconds")
+        return "%d %s, %d %s" % (delta_m, " minute" if 2 > delta_m > 1 else " minutes", delta_s,
+                                 " second" if 2 > delta_s > 1 else " seconds")
     else:
-        return "%d %s" % (delta_s, "second" if 2 > delta_s > 1 else "seconds")
+        return "%d %s" % (delta_s, " second" if 2 > delta_s > 1 else " seconds")
 
 try:
     @app.route('/')

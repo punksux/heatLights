@@ -1,3 +1,5 @@
 .idea
 *.log
 *.ini
+static/errors.html
+static/log.html
