@@ -278,7 +278,7 @@ def time_since(other_date):
 try:
     @app.route('/')
     def my_form():
-        log = [log.rstrip('\n') for log in open('log.log')]
+        log = [log.rstrip('\n') for log in open('static/log.html')]
         if len(log) > 16:
             log = log[len(log)-17:]
         log2 = []
