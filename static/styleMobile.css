@@ -1,6 +1,7 @@
 
 #bulbs {
     width:720px;
+    overflow: hidden;
 }
 
 #fakeLogo {

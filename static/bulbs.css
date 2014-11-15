@@ -37,6 +37,7 @@
     position: relative;
     margin: 0 auto;
     top:-4px;
+    box-shadow: 4px 6px 6px #111;
 }
 
 .red.lights_on {
