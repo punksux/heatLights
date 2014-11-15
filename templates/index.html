@@ -22,7 +22,7 @@
             }
             for (var i = long; i > 0; i--) {
                  heat.push({x: new Date(log[log.length - i][0]), y: parseInt(log[log.length - i][2])});
-                temps.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][1])});
+                temps.push({x: new Date(log[log.length - i][0]), y: parseFloat(log[log.length - i][1]), indexLabel: log[log.length - i][3]});
             }
 
             var chart;
@@ -73,7 +73,10 @@
                         markerSize: 10,
                         markerColor: '#222',
                         markerBorderColor: "rgba(54,158,173,0.95)",
-                        markerBorderThickness: 2
+                        markerBorderThickness: 2,
+                        indexLabelOrientation: "vertical",
+                        indexLabelPlacement: "inside",
+                        indexLabelFontColor: "white"
                     }
                 ]});
             chart.render();

@@ -83,6 +83,10 @@ input[type=submit]{
     padding-left: 0;
 }
 
+#heatHeader {
+    font-size: 140px;
+}
+
 #sliderCover{
     position: absolute;
     top:0;

@@ -264,16 +264,16 @@ def time_since(other_date):
 
     if delta_d >= 1:
         return "%d %s, %d %s, %d %s" % (delta_d, " day" if delta_d == 1 else " days", delta_h,
-                                        " hour" if delta_h == 1 else " hours", delta_m,
-                                        " minute" if delta_m == 1 else " minutes")
+                                        " hour" if 2 > delta_h >= 1 else " hours", delta_m,
+                                        " minute" if 2 > delta_m >= 1 else " minutes")
     if delta_h >= 1:
-        return "%d %s, %d %s" % (delta_h, " hour" if delta_h == 1 else " hours",
-                                 delta_m, " minute" if delta_m == 1 else " minutes")
+        return "%d %s, %d %s" % (delta_h, " hour" if 2 > delta_h >= 1 else " hours",
+                                 delta_m, " minute" if 2 > delta_m >= 1 else " minutes")
     if delta_m >= 1:
-        return "%d %s, %d %s" % (delta_m, " minute" if delta_m == 1 else " minutes", delta_s,
-                                 " second" if delta_s == 1 else " seconds")
+        return "%d %s, %d %s" % (delta_m, " minute" if 2 > delta_m >= 1 else " minutes", delta_s,
+                                 " second" if 2 > delta_s >= 1 else " seconds")
     else:
-        return "%d %s" % (delta_s, " second" if delta_s == 1 else " seconds")
+        return "%d %s" % (delta_s, " second" if 2 > delta_s >= 1 else " seconds")
 
 try:
     @app.route('/')
@@ -285,7 +285,7 @@ try:
         for i in log:
             if i != '':
                 date = datetime.strptime(i.split('|')[0], '%Y,%m,%d,%H,%M')
-                log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2]])
+                log2.append([date.strftime('%b %d, %Y %H:%M'), i.split('|')[1], i.split('|')[2], i.split('|')[3]])
         templateData['log'] = json.dumps(log2)
         templateData['uptime'] = time_since(uptime_counter)
         return render_template("index.html", **templateData)
