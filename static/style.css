@@ -1,5 +1,5 @@
 @font-face {
-    font-family: 'dirty_and_classicregular';
+    font-family: 'Dirty and Classic';
     src: url('/static/dirtc-webfont.eot');
     src: url('/static/dirtc-webfont.eot?#iefix') format('embedded-opentype'),
          url('/static/dirtc-webfont.woff2') format('woff2'),
@@ -12,7 +12,7 @@
 }
 
 @font-face {
-    font-family: 'mf_kill_the_lightsregular';
+    font-family: 'Kill The Lights';
     src: url('/static/killthelights-webfont.eot');
     src: url('/static/killthelights-webfont.eot?#iefix') format('embedded-opentype'),
          url('/static/killthelights-webfont.woff2') format('woff2'),
