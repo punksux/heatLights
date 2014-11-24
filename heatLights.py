@@ -159,7 +159,7 @@ def get_temps_from_probes():
                 temp_string = lines[1][equals_pos+2:]
                 temp_c = float(temp_string) / 1000.0
                 in_temp = temp_c * 9.0 / 5.0 + 32.0
-                return in_temp
+                return round(in_temp, 2)
 
     else:
         return random.randrange(-32, 104)
@@ -174,11 +174,11 @@ def write_log(message, on_off, weather):
     lines = r.readlines()
     r.close()
     r = open('static/log.html', 'w')
-    if len(lines) > 48 * 7:
+    if len(lines) > (48 * 7):
         r.writelines(lines[len(lines)-335: len(lines)])
     else:
         r.writelines(lines)
-    r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather + '\n')
+    r.write('\n' + datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather)
     r.close()
 
 
