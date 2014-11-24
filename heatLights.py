@@ -174,7 +174,7 @@ def write_log(message, on_off, weather):
     lines = r.readlines()
     r.close()
     r = open('static/log.html', 'w')
-    if lines > 48 * 7:
+    if len(lines) > 48 * 7:
         r.writelines(lines[len(lines)-335: len(lines)])
     else:
         r.writelines(lines)
@@ -260,7 +260,6 @@ def manual_lights_off():
             GPIO.output(lights_pin, True)
         else:
             print('%s - Manual lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
-        templateData['timer'] = 0
         templateData['lights_on'] = False
 
 
@@ -374,8 +373,12 @@ try:
                 sched.unschedule_job(job)
             else:
                 sched.unschedule_job(lights_start)
+            if templateData['lights_on']:
+                if on_pi:
+                    GPIO.output(lights_pin, True)
+                else:
+                    print('%s - Lights off.' % datetime.now().strftime('%m/%d/%Y %I:%M %p'))
             templateData['light_program_running'] = False
-            templateData['timer'] = 0
             return redirect(url_for('my_form'))
 
     @app.route("/manLights", methods=['POST'])
