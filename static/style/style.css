@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'Dirty and Classic';
-    src: url('/static/dirtc-webfont.eot');
-    src: url('/static/dirtc-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/dirtc-webfont.woff2') format('woff2'),
-         url('/static/dirtc-webfont.woff') format('woff'),
-         url('/static/dirtc-webfont.ttf') format('truetype'),
-         url('/static/dirtc-webfont.svg#dirty_and_classicregular') format('svg');
+    src: url('/static/fonts/dirtc-webfont.eot');
+    src: url('/static/fonts/dirtc-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/dirtc-webfont.woff2') format('woff2'),
+         url('/static/fonts/dirtc-webfont.woff') format('woff'),
+         url('/static/fonts/dirtc-webfont.ttf') format('truetype'),
+         url('/static/fonts/dirtc-webfont.svg#dirty_and_classicregular') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -13,12 +13,12 @@
 
 @font-face {
     font-family: 'Kill The Lights';
-    src: url('/static/killthelights-webfont.eot');
-    src: url('/static/killthelights-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/killthelights-webfont.woff2') format('woff2'),
-         url('/static/killthelights-webfont.woff') format('woff'),
-         url('/static/killthelights-webfont.ttf') format('truetype'),
-         url('/static/killthelights-webfont.svg#mf_kill_the_lightsregular') format('svg');
+    src: url('/static/fonts/killthelights-webfont.eot');
+    src: url('/static/fonts/killthelights-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/killthelights-webfont.woff2') format('woff2'),
+         url('/static/fonts/killthelights-webfont.woff') format('woff'),
+         url('/static/fonts/killthelights-webfont.ttf') format('truetype'),
+         url('/static/fonts/killthelights-webfont.svg#mf_kill_the_lightsregular') format('svg');
     font-weight: normal;
     font-style: normal;
 

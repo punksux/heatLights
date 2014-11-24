@@ -29,6 +29,17 @@ weather = ''
 lights_pin = 13
 heat_pin = 11
 
+try:
+    x = open('settings.ini', 'r')
+    xx = x.readlines()
+    x.close()
+except:
+    x = open('settings.ini', 'w')
+    x.write('\n')
+    x.write('\n')
+    x.close()
+    xx = ['', '']
+
 templateData = {
     'temp': 0.0,
     'heat_on': False,
@@ -37,8 +48,8 @@ templateData = {
     'log': '',
     'sunset_hour': 10,
     'sunset_minute': 40,
-    'start_date': '8/20/2014',
-    'lights_off_time': '22:30',
+    'start_date': xx[0],
+    'lights_off_time': xx[1],
     'settings_set': False,
     'light_program_running': False,
     'message': '',
@@ -46,6 +57,9 @@ templateData = {
     'uptime': 0,
     'heat_count': 0
 }
+
+if templateData['start_date'] != '' and templateData['lights_off_time'] != '':
+    templateData['settings_set'] = True
 
 sched = Scheduler()
 sched.start()
@@ -99,9 +113,6 @@ def check_weather():
         else:
             json_string = f.read()
             parsed_json = json.loads(json_string.decode("utf8"))
-            old_temp = (templateData['temp'] + old_temp) / 2
-            templateData['temp'] = get_temps_from_probes()
-            print(str(old_temp) + " - " + str(templateData['temp']))
 
             templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
             templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
@@ -116,6 +127,10 @@ def check_weather():
 
             print(precip)
             f.close()
+
+        old_temp = round((templateData['temp'] + old_temp) / 2, 2)
+        templateData['temp'] = get_temps_from_probes()
+        print(str(old_temp) + " - " + str(templateData['temp']))
     else:
         templateData['temp'] = weather_test
         precip = True
@@ -155,12 +170,26 @@ def write_log(message, on_off, weather):
         on_off = "1"
     else:
         on_off = "0"
-    if os.path.getsize('static/log.html') > 1000000:
-        r = open('static/log.html', 'w')
+    r = open('static/log.html', 'r')
+    lines = r.readlines()
+    r.close()
+    r = open('static/log.html', 'w')
+    if lines > 48 * 7:
+        r.writelines(lines[len(lines)-335: len(lines)])
     else:
-        r = open('static/log.html', 'a')
+        r.writelines(lines)
     r.write(datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather + '\n')
     r.close()
+
+
+def write_settings(line, data):
+    q = open('settings.ini', 'r')
+    lines = q.readlines()
+    q.close()
+    lines[line] = data + '\n'
+    q = open('settings.ini', 'w')
+    q.writelines(lines)
+    q.close()
 
 
 #### --== Start Heat ==-- ####
@@ -293,24 +322,27 @@ try:
     @app.route('/', methods=['POST'])
     def my_form_post():
         start_date = request.form['start_date']
-        try:
-            start_date = datetime.strptime(start_date, '%m/%d/%Y')
-        except:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        if start_date != "":
+            try:
+                start_date = datetime.strptime(start_date, '%m/%d/%Y')
+            except:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d')
 
-        start_date = start_date.strftime('%m/%d/%Y')
-        if start_date != "" and datetime.strptime(start_date + " " + str(templateData['sunset_hour']) + " " +
-                                                  str(templateData['sunset_minute']),
-                                                  '%m/%d/%Y %H %M') > datetime.now():
-            templateData['start_date'] = start_date
-            templateData['settings_set'] = True
-            templateData['message'] = ''
-            if templateData['light_program_running']:
-                return redirect(url_for('stop_program'))
-        else:
-            templateData['message'] = "Set date for a day in the future"
+            start_date = start_date.strftime('%m/%d/%Y')
+            if datetime.strptime(start_date + " " + str(templateData['sunset_hour']) + " " +
+                                                      str(templateData['sunset_minute']),
+                                                      '%m/%d/%Y %H %M') > datetime.now():
+                templateData['start_date'] = start_date
+                write_settings(0, start_date)
+                templateData['settings_set'] = True
+                templateData['message'] = ''
+                if templateData['light_program_running']:
+                    return redirect(url_for('stop_program'))
+            else:
+                templateData['message'] = "Set date for a day in the future"
         if request.form['off_time'] != "":
             templateData['lights_off_time'] = request.form['off_time']
+            write_settings(1, templateData['lights_off_time'])
             templateData['message'] = ''
         return render_template("index.html", **templateData)
 
