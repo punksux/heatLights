@@ -245,8 +245,7 @@ def turn_off_lights():
     else:
         print('%s - Lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = False
-    job = sched.add_date_job(pre_lights, datetime.now().replace(day=datetime.now().day+1,
-                                                                hour=2, minute=00))
+    job = sched.add_date_job(pre_lights, (datetime.now()+ timedelta(days=1)).replace(hour=2, minute=00))
 
 
 def pre_lights():
