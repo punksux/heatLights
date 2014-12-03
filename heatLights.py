@@ -47,9 +47,9 @@ templateData = {
     'lights_on_time': 0,
     'log': '',
     'sunset_hour': 10,
-    'sunset_minute': 40,
-    'start_date': xx[0],
-    'lights_off_time': xx[1],
+    'sunset_minute': 50,
+    'start_date': xx[0].replace('\n', ''),
+    'lights_off_time': xx[1].replace('\n', ''),
     'settings_set': False,
     'light_program_running': False,
     'message': '',
@@ -231,12 +231,11 @@ def turn_on_lights():
         print('%s - Lights on.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = True
     light_program_has_run = True
-    templateData['lights_off_time'] = datetime.strptime(templateData['lights_off_time'], '%H:%M') + timedelta(
-        seconds=(random.randint(0, 10)*random.randint(-1, 1))*60)
-
-    templateData['lights_off_time'] = templateData['lights_off_time'].strftime('%H:%M')
-    split = templateData['lights_off_time'].split(':')
-    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=int(split[0]), minute=int(split[1])))
+    off_time = datetime.strptime(templateData['lights_off_time'], '%H:%M') + \
+        timedelta(seconds=((random.randint(0, 10)*random.randint(-1, 1))*60))
+    print('Off at: ' + off_time.strftime('%I:%M %p'))
+    job = sched.add_date_job(turn_off_lights, datetime.now().replace(hour=int(off_time.hour),
+                                                                     minute=int(off_time.minute)))
 
 
 def turn_off_lights():
@@ -264,14 +263,12 @@ def manual_lights_off():
 
 def get_start_time():
     start_time = datetime.strptime(str(templateData['sunset_hour']) + ":" + str(templateData['sunset_minute']), '%H:%M')
-    print(start_time.strftime('%H:%M'))
     random_time = random.randint(1, 10)*random.randint(-1, 1)
     start_time += timedelta(seconds=random_time*60)
-    print(start_time.strftime('%H:%M'))
-    templateData['sunset_hour'] = start_time.strftime('%H')
-    templateData['sunset_minute'] = start_time.strftime('%M')
+    templateData['sunset_hour'] = start_time.hour
+    templateData['sunset_minute'] = start_time.minute
     templateData['lights_on_time'] = start_time.strftime('%I:%M %p')
-    print(templateData['lights_on_time'])
+    print('On at: ' + templateData['lights_on_time'])
 
 #### --== End Lights ==-- ####
 
@@ -328,8 +325,8 @@ try:
 
             start_date = start_date.strftime('%m/%d/%Y')
             if datetime.strptime(start_date + " " + str(templateData['sunset_hour']) + " " +
-                                                      str(templateData['sunset_minute']),
-                                                      '%m/%d/%Y %H %M') > datetime.now():
+                                 str(templateData['sunset_minute']),
+                                 '%m/%d/%Y %H %M') > datetime.now():
                 templateData['start_date'] = start_date
                 write_settings(0, start_date)
                 templateData['settings_set'] = True
