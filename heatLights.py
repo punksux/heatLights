@@ -120,7 +120,7 @@ def check_weather():
             print(parsed_json['current_observation']['weather'])
             weather = parsed_json['current_observation']['weather'].lower()
             precip_check = ['rain', 'snow', 'drizzle', 'hail', 'ice', 'thunderstorm']
-            if any(x in weather for x in precip_check):
+            if any(m in weather for m in precip_check):
                 precip = True
             else:
                 precip = False
@@ -165,7 +165,7 @@ def get_temps_from_probes():
         return random.randrange(-32, 104)
 
 
-def write_log(message, on_off, weather):
+def write_log(message, on_off, weather2):
     if on_off:
         on_off = "1"
     else:
@@ -178,7 +178,7 @@ def write_log(message, on_off, weather):
         r.writelines(lines[len(lines)-335: len(lines)])
     else:
         r.writelines(lines)
-    r.write('\n' + datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather)
+    r.write('\n' + datetime.now().strftime('%Y,%m,%d,%H,%M') + "|" + str(message) + "|" + on_off + "|" + weather2)
     r.close()
 
 
@@ -224,7 +224,7 @@ else:
 
 #### --== Start Lights ==-- ####
 def turn_on_lights():
-    global light_program_has_run
+    global light_program_has_run, job
     if on_pi:
         GPIO.output(lights_pin, False)
     else:
@@ -239,15 +239,17 @@ def turn_on_lights():
 
 
 def turn_off_lights():
+    global job
     if on_pi:
         GPIO.output(lights_pin, True)
     else:
         print('%s - Lights off.' % (datetime.now().strftime('%m/%d/%Y %I:%M %p')))
     templateData['lights_on'] = False
-    job = sched.add_date_job(pre_lights, (datetime.now()+ timedelta(days=1)).replace(hour=2, minute=00))
+    job = sched.add_date_job(pre_lights, (datetime.now() + timedelta(days=1)).replace(hour=2, minute=00))
 
 
 def pre_lights():
+    global job
     get_start_time()
     job = sched.add_date_job(turn_on_lights, datetime.now().replace(hour=int(templateData['sunset_hour']),
                                                                     minute=int(templateData['sunset_minute'])))
@@ -364,7 +366,7 @@ try:
     @app.route("/lightsStop")
     def stop_program():
         if templateData['light_program_running']:
-            global lights_start
+            global lights_start, job
             if light_program_has_run:
                 sched.unschedule_job(job)
             else:
