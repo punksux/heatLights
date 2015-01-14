@@ -24,6 +24,7 @@ old_temp = 0.0
 precip = False
 uptime_counter = datetime.now()
 weather = ''
+snow_last = datetime.now()
 
 ####  --== GPIO Pin Setup ==--  ####
 lights_pin = 13
@@ -93,46 +94,62 @@ if on_pi:
 
 ####  --== Get Weather ==--  ####
 def check_weather():
-    global old_temp, precip, weather
+    global old_temp, precip, weather, from_pi, snow_last
+    from_pi = False
     if weather_test == 200:
         global something_wrong
         global f
         weather_website = ('http://api.wunderground.com/api/c5e9d80d2269cb64/conditions/astronomy/q/%s.json' % location)
+
         try:
-            f = urlopen(weather_website, timeout=3)
+            f = urlopen('//192.168.1.97:88/weather.json', timeout=3)
+            from_pi = True
             something_wrong = False
-        except urllib.error.URLError as e:
-            logging.error('Data not retrieved because %s' % e)
-            something_wrong = True
-        except timeout:
-            logging.error('Socket timed out')
-            something_wrong = True
+        except:
+            try:
+                f = urlopen(weather_website, timeout=3)
+                from_pi = False
+                something_wrong = False
+            except urllib.error.URLError as e:
+                logging.error('Data not retrieved because %s' % e)
+                something_wrong = True
+            except timeout:
+                logging.error('Socket timed out')
+                something_wrong = True
 
         if something_wrong:
             logging.error("No Internet")
         else:
             json_string = f.read()
+            f.close()
             parsed_json = json.loads(json_string.decode("utf8"))
 
-            templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
-            templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
+            if from_pi:
+                templateData['sunset_hour'] = parsed_json['ssHour']
+                templateData['sunset_minute'] = parsed_json['ssMinute']
+                weather = parsed_json['weather'].lower()
+            else:
+                templateData['sunset_hour'] = parsed_json['sun_phase']['sunset']['hour']
+                templateData['sunset_minute'] = parsed_json['sun_phase']['sunset']['minute']
+                weather = parsed_json['current_observation']['weather'].lower()
 
-            print(parsed_json['current_observation']['weather'])
-            weather = parsed_json['current_observation']['weather'].lower()
             precip_check = ['rain', 'snow', 'drizzle', 'hail', 'ice', 'thunderstorm']
             if any(m in weather for m in precip_check):
                 precip = True
             else:
                 precip = False
 
+            snow = ['snow']
+            if any(m in weather for m in snow):
+                snow_last = datetime.now()
+
             print(precip)
-            f.close()
 
         old_temp = round((templateData['temp'] + old_temp) / 2, 2)
         templateData['temp'] = get_temps_from_probes()
         print(str(old_temp) + " - " + str(templateData['temp']))
     else:
-        templateData['temp'] = weather_test
+        templateData['temp'] = get_temps_from_probes()
         precip = True
 
 ####  --== Get Temps ==--  ####
@@ -144,25 +161,32 @@ if on_pi:
 
 
 def get_temps_from_probes():
+    temp_temps = []
     if on_pi:
-        y = open(short_temp_sensor, 'r')
-        lines = y.readlines()
-        y.close()
+        for i in range(0, 5):
+            y = open(short_temp_sensor, 'r')
+            lines = y.readlines()
+            y.close()
 
-        if lines[0].strip()[-3:] != 'YES':
-            print('No temp from sensor.')
-            time.sleep(5)
-            get_temps_from_probes()
-        else:
-            equals_pos = lines[1].find('t=')
-            if equals_pos != -1:
-                temp_string = lines[1][equals_pos+2:]
-                temp_c = float(temp_string) / 1000.0
-                in_temp = temp_c * 9.0 / 5.0 + 32.0
-                return round(in_temp, 2)
-
+            if lines[0].strip()[-3:] != 'YES':
+                print('No temp from sensor.')
+                time.sleep(5)
+                get_temps_from_probes()
+            else:
+                equals_pos = lines[1].find('t=')
+                if equals_pos != -1:
+                    temp_string = lines[1][equals_pos+2:]
+                    temp_c = float(temp_string) / 1000.0
+                    in_temp = temp_c * 9.0 / 5.0 + 32.0
+                    temp_temps.append(round(in_temp, 2))
+                    #return round(in_temp, 2)
+        temp_temps.sort()
+        temp_temps.pop(0)
+        temp_temps.pop(3)
+        final_temp = (temp_temps[0] + temp_temps[1] + temp_temps[2])/3
+        return final_temp
     else:
-        return random.randrange(-32, 104)
+        return random.randrange(-320, 1040)/10
 
 
 def write_log(message, on_off, weather2):
@@ -195,7 +219,9 @@ def write_settings(line, data):
 #### --== Start Heat ==-- ####
 def turn_on_heat():
     check_weather()
-    if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 34.0 and precip):
+    last_snow = (datetime.now() - snow_last).total_seconds()
+    sec = 5 * 24 * 60 * 60
+    if (templateData['temp'] < 34.0 and old_temp > 38.0) or (templateData['temp'] < 34.0 and precip) or (last_snow < sec and 32.0 < templateData['temp'] < 39.0):
         if on_pi:
             GPIO.output(heat_pin, False)
         else:
@@ -214,10 +240,9 @@ def turn_on_heat():
 
 s = datetime.now()
 if s.minute > 30:
-    sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(hour=s.hour+1, minute=00,
-                                                                            second=00, microsecond=0))
+    sched.add_interval_job(turn_on_heat, seconds=1800, start_date=(s + timedelta(hours=1)).replace(minute=00, second=30, microsecond=0))
 else:
-    sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=00, microsecond=0))
+    sched.add_interval_job(turn_on_heat, seconds=1800, start_date=s.replace(minute=30, second=30, microsecond=0))
 
 #### --== End Heat ==-- ####
 
