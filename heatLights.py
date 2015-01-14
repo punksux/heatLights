@@ -24,7 +24,7 @@ old_temp = 0.0
 precip = False
 uptime_counter = datetime.now()
 weather = ''
-snow_last = datetime.now()
+snow_last = datetime.strptime('01/01/1980', '%m/%d/%Y')
 
 ####  --== GPIO Pin Setup ==--  ####
 lights_pin = 13
